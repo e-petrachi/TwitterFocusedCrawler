@@ -1,0 +1,10 @@
+*.csv
+*.arff
+.idea/*
+.idea
+.gradle/*
+.gradle
+gradle/*
+out/*
+gradlew
+gradlew.bat
