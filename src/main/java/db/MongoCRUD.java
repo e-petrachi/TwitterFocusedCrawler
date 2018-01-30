@@ -86,6 +86,19 @@ public class MongoCRUD {
         }
         return all;
     }
+    public ArrayList<String> findAllLabel(int num){
+        DBCollection collection0 = db.getCollection("label" + num);
+        DBCursor cursor0 = collection0.find();
+        cursor0.next();
+
+        ArrayList<String> labels = new ArrayList<>();
+
+        int lunghezza = cursor0.curr().keySet().size()-1;
+        for (int i=0;i<lunghezza;i++) {
+            labels.add( (String) cursor0.curr().get("" + i));
+        }
+        return labels;
+    }
     public MongoCursor<News2Annotations> findAllNews2Annotations(String query){
         MongoCursor<News2Annotations> all;
         if (query.isEmpty()){

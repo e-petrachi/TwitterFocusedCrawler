@@ -3,6 +3,10 @@ import api.news.NewsExtractor;
 import api.tagme4j.TagMeClient;
 import api.tagme4j.TagMeException;
 import api.tagme4j.model.Annotation;
+import api.tagme4j.model.Relatedness;
+import api.tagme4j.request.RelRequest;
+import api.tagme4j.request.TagRequest;
+import api.tagme4j.response.RelResponse;
 import api.tagme4j.response.TagResponse;
 import db.MongoCRUD;
 import model.*;
@@ -34,7 +38,7 @@ public class Main {
     private static boolean[] passoAlgoritmo = {
             false,
             false,false,false,false,false,
-            false,false,false,false,true,
+            true,false,false,false,false,
             false,false,false,false,false
     };
 
@@ -59,10 +63,9 @@ public class Main {
             annotationsExtractionAndSave();
         if (passoAlgoritmo[5])
             createMatrixForClustering2();
-
-
         if (passoAlgoritmo[6])
             calculatingRelativityForEntitiesAndSave();
+
         if (passoAlgoritmo[7])
             createMatrixForClustering3();
         if (passoAlgoritmo[8])
@@ -448,18 +451,37 @@ public class Main {
     }
 
     private static void calculatingRelativityForEntitiesAndSave(){
-        /*
-        // TODO questo fa la similarità tra entità
-        RelRequest relReq = tagMeClient.rel();
-        // relReq.id();
-        // relReq.tt();
 
-        List<Annotation> aa = tagResponse.getAnnotations();
+        MongoCRUD mongoCRUD = new MongoCRUD(realDB);
+        // TODO change to 2
+        ArrayList<String> labels = mongoCRUD.findAllLabel(3);
 
-        for (Annotation a : aa) {
-            System.out.println(a.toString());
+        TagMeClient tagMeClient = new TagMeClient();
+
+        double [][] matrix3 = new double[labels.size()][labels.size()];
+
+        int i = 0;
+        for (String label_out :labels) {
+            int j = 0;
+            for (String label_in : labels){
+                RelRequest relRequest = tagMeClient.rel().tt(label_in, label_out);
+                System.out.println(label_in + " ," + label_out);
+                RelResponse relResponse = null;
+                try {
+                    relResponse = relRequest.execute();
+                } catch (TagMeException e) {
+                    System.out.print(".");
+                }
+                List<Relatedness> lr = relResponse.getResult();
+                System.out.println(lr.get(0).getErr());
+                matrix3[i][j] = lr.get(0).getRel();
+                System.out.println(matrix3[i][j]);
+                j++;
+            }
+            i++;
         }
 
+        /*
 
         TweetExtractor tweetExtractor = new TweetExtractor();
         tweetExtractor.auth();
