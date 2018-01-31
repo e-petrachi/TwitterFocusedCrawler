@@ -99,6 +99,20 @@ public class MongoCRUD {
         }
         return labels;
     }
+    public ArrayList<Long> findAllLabelId(int num){
+        DBCollection collection0 = db.getCollection("label" + num);
+        DBCursor cursor0 = collection0.find();
+        cursor0.next();
+        cursor0.next();
+
+        ArrayList<Long> labelsId = new ArrayList<>();
+
+        int lunghezza = cursor0.curr().keySet().size()-1;
+        for (int i=0;i<lunghezza;i++) {
+            labelsId.add( (Long) cursor0.curr().get("" + i));
+        }
+        return labelsId;
+    }
     public MongoCursor<News2Annotations> findAllNews2Annotations(String query){
         MongoCursor<News2Annotations> all;
         if (query.isEmpty()){
@@ -122,9 +136,17 @@ public class MongoCRUD {
             collection.save(cluster);
         }
     }
+    public void saveCluster(double[][] matrix){
+        for (double[] row : matrix){
+            collection.save(row);
+        }
+    }
 
     public void saveLabel(Label2Cluster l2c){
         collection.save(l2c.getLabelsList());
+        if (l2c.getIdsList().isEmpty())
+            return;
+        collection.save(l2c.getIdsList());
     }
 
     public void retrieveCluster(int num) throws IOException {
@@ -134,24 +156,33 @@ public class MongoCRUD {
 
     }
     private void saveCSV(int num) throws IOException{
-        DBCollection collection0 = db.getCollection("label" + num);
+        DBCollection collection0 = null;
+
+        if (num == 0){
+            collection0 = db.getCollection("label2");
+        } else {
+            collection0 = db.getCollection("label" + num);
+        }
         DBCursor cursor0 = collection0.find();
 
         BufferedWriter writer = new BufferedWriter(new FileWriter("cluster" + num + ".csv"));
         String head = "";
 
         int lunghezza = 0;
-
         cursor0.next();
+
         lunghezza = cursor0.curr().keySet().size()-1;
         for (int i=0;i<lunghezza;i++) {
-            head = head + ((String) cursor0.curr().get("" + i)).toLowerCase().replaceAll(" |,|;|:", "_").replaceAll("\\.|!|\\?|\\'","") + ";";
+            String s = ((String) cursor0.curr().get("" + i)).toLowerCase().replaceAll(" |,|;|:", "_").replaceAll("\\.|!|\\?|\\'","");
+            head = head + s + ";";
         }
         head = head + "\n";
 
         writer.write(head);
 
+
         DBCollection collection = db.getCollection("cluster" + num);
+
         DBCursor cursor = collection.find();
 
         while (cursor.hasNext()) {
@@ -169,7 +200,13 @@ public class MongoCRUD {
         writer.close();
     }
     private void saveARFF(int num) throws IOException{
-        DBCollection collection0 = db.getCollection("label" + num);
+        DBCollection collection0 = null;
+
+        if (num == 0){
+            collection0 = db.getCollection("label2");
+        } else {
+            collection0 = db.getCollection("label" + num);
+        }
         DBCursor cursor0 = collection0.find();
 
         BufferedWriter writer = new BufferedWriter(new FileWriter("cluster" + num + ".arff"));
@@ -184,7 +221,8 @@ public class MongoCRUD {
         System.out.println("\tATTRIBUTI # " + lunghezza);
 
         for (int i=0;i<lunghezza;i++) {
-            head = head + "@ATTRIBUTE " + ((String) cursor0.curr().get("" + i)).toLowerCase().replaceAll(" |,|;|:", "_").replaceAll("\\.|!|\\?|\\'","") + " NUMERIC\n";
+            String s = ((String) cursor0.curr().get("" + i)).toLowerCase().replaceAll(" |,|;|:", "_").replaceAll("\\.|!|\\?|\\'","");
+            head = head + "@ATTRIBUTE " + s + " NUMERIC\n";
         }
         head = head + "\n";
 

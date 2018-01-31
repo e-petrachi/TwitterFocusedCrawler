@@ -38,11 +38,11 @@ public class Main {
     private static boolean[] passoAlgoritmo = {
             false,
             false,false,false,false,false,
-            true,false,false,false,false,
+            false,false,true,false,false,
             false,false,false,false,false
     };
-
-    private static boolean[] manhattanDistance = { false, true, false };
+    // settare a true per eseguire la distanza di Manhattan per i relativi cluster 0 1 2 3
+    private static boolean[] manhattanDistance = { false, false, true, false };
 
 
     public static void main(String[] args) throws Exception {
@@ -65,16 +65,20 @@ public class Main {
             createMatrixForClustering2();
         if (passoAlgoritmo[6])
             calculatingRelativityForEntitiesAndSave();
-
         if (passoAlgoritmo[7])
-            createMatrixForClustering3();
+            exportCluster0CsvArff();
         if (passoAlgoritmo[8])
-            exportAllClusterCsvArff();
+            executeCluster0();
+
         if (passoAlgoritmo[9])
-            executeCluster1();
+            createMatrixForClustering3();
         if (passoAlgoritmo[10])
-            executeCluster2();
+            exportAllClusterCsvArff();
         if (passoAlgoritmo[11])
+            executeCluster1();
+        if (passoAlgoritmo[12])
+            executeCluster2();
+        if (passoAlgoritmo[13])
             executeCluster3();
 
         System.out.println("\n------------------------\tEND\t\t------------------------\n");
@@ -284,7 +288,7 @@ public class Main {
             } catch (Exception e) {
                 System.out.println("### NUM CLUSTER non valido!");
             }
-            if(manhattanDistance[0]) {
+            if(manhattanDistance[1]) {
                 try {
                     model.setDistanceFunction(new weka.core.ManhattanDistance());
                 } catch (Exception e) {
@@ -301,6 +305,8 @@ public class Main {
             num = num+1;
         } while (model.getSquaredError() > 0);
 
+        System.out.println(model);
+
     }
 
     private static void createMatrixForClustering2(){
@@ -313,9 +319,9 @@ public class Main {
         Label2Cluster l2c2 = new Label2Cluster(sogliaCluster2);
         System.out.println("\tCREAZIONE LABEL per CLUSTER2");
         for (News2Annotations news: allNews2Annotation){
-            List<String> args = news.getAnnotationsTitleAsString();
-            //List<String> args = news.getAnnotationsSpotAsString();
-            for (String key: args) {
+            List<Annotation> args = news.getAnnotations();
+
+            for (Annotation key: args) {
                 l2c2.addLabel(key);
             }
             System.out.print(".");
@@ -372,6 +378,7 @@ public class Main {
         mongoCRUD.setCollection("cluster2");
         mongoCRUD.saveCluster(l2c2);
         System.out.println("\tSALVATAGGIO COMPLETATO\n");
+
     }
     private static void executeCluster2() {
         System.out.println("\n\tCLUSTERING2\n");
@@ -399,7 +406,7 @@ public class Main {
             } catch (Exception e) {
                 System.out.println("### NUM CLUSTER non valido!");
             }
-            if(manhattanDistance[1]) {
+            if(manhattanDistance[2]) {
                 try {
                     model.setDistanceFunction(new weka.core.ManhattanDistance());
                 } catch (Exception e) {
@@ -415,11 +422,71 @@ public class Main {
             System.out.println("#Cluster " + num + "-> sum of squared errors : " + model.getSquaredError());
             num = num+1;
         } while (model.getSquaredError() > 0);
+
+        System.out.println(model);
     }
+
+    private static void executeCluster0() {
+        System.out.println("\n\tCLUSTERING0\n");
+
+        DataSource source = null;
+        try {
+            source = new DataSource("cluster0.arff");
+        } catch (Exception e) {
+            System.out.println("### FILE ARFF non trovato!");
+        }
+        Instances data = null;
+        try {
+            data = source.getDataSet();
+        } catch (Exception e) {
+            System.out.println("### FILE ARFF non valido!");
+        }
+
+        int num = 1;
+        SimpleKMeans model;
+
+        do {
+            model = new SimpleKMeans();
+            try {
+                model.setNumClusters(num);
+            } catch (Exception e) {
+                System.out.println("### NUM CLUSTER non valido!");
+            }
+            if(manhattanDistance[0]) {
+                try {
+                    model.setDistanceFunction(new weka.core.ManhattanDistance());
+                } catch (Exception e) {
+                    System.out.println("### DISTANZA di CLUSTERING non valida!");
+                }
+            }
+
+            try {
+                model.buildClusterer(data);
+            } catch (Exception e) {
+                System.out.println("### CLUSTERING non valido!");
+            }
+            System.out.println("#Cluster " + num + "-> sum of squared errors : " + model.getSquaredError());
+            num = num+1;
+        } while (model.getSquaredError() > 0);
+
+        System.out.println(model);
+    }
+
     private static void createMatrixForClustering3(){
 
     }
     private static void executeCluster3() {}
+
+    private static void exportCluster0CsvArff() {
+        System.out.println("\n\tSALVATAGGIO file CSV e ARFF\n");
+        MongoCRUD mongoCRUD = new MongoCRUD(realDB);
+        try {
+            mongoCRUD.retrieveCluster(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("\n\tSALVATAGGIO FILE CSV ARFF COMPLETATO\n");
+    }
 
     private static void exportAllClusterCsvArff() {
 
@@ -453,33 +520,39 @@ public class Main {
     private static void calculatingRelativityForEntitiesAndSave(){
 
         MongoCRUD mongoCRUD = new MongoCRUD(realDB);
-        // TODO change to 2
-        ArrayList<String> labels = mongoCRUD.findAllLabel(3);
+        ArrayList<Long> labels = mongoCRUD.findAllLabelId(2);
 
         TagMeClient tagMeClient = new TagMeClient();
 
         double [][] matrix3 = new double[labels.size()][labels.size()];
 
+        System.out.println("\tCREAZIONE MATRIX per CLUSTER di SUPPORTO\n");
+
         int i = 0;
-        for (String label_out :labels) {
+        for (Long label_out :labels) {
             int j = 0;
-            for (String label_in : labels){
-                RelRequest relRequest = tagMeClient.rel().tt(label_in, label_out);
-                System.out.println(label_in + " ," + label_out);
-                RelResponse relResponse = null;
-                try {
-                    relResponse = relRequest.execute();
-                } catch (TagMeException e) {
-                    System.out.print(".");
+            for (Long label_in : labels){
+                if (i==j){
+                    matrix3[i][j] = 1;
+                } else {
+                    RelResponse relResponse = null;
+                    try {
+                        relResponse = tagMeClient.rel().id(label_in, label_out).execute();
+                    } catch (TagMeException e) {
+                        System.out.print(".");
+                    }
+                    List<Relatedness> lr = relResponse.getResult();
+                    matrix3[i][j] = (Math.floor(lr.get(0).getRel() * 1000) / 1000);
                 }
-                List<Relatedness> lr = relResponse.getResult();
-                System.out.println(lr.get(0).getErr());
-                matrix3[i][j] = lr.get(0).getRel();
-                System.out.println(matrix3[i][j]);
                 j++;
             }
+            System.out.print(".");
             i++;
         }
+        System.out.println("\n\tSALVATAGGIO CLUSTER di SUPPORTO");
+        mongoCRUD.setCollection("cluster0");
+        mongoCRUD.saveCluster(matrix3);
+        System.out.println("\tSALVATAGGIO COMPLETATO\n");
 
         /*
 

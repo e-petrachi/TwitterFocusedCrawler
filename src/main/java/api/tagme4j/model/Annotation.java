@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Annotation {
+public class Annotation implements Comparable<Annotation>{
 
     private long id;
     private String title;
@@ -109,5 +109,10 @@ public class Annotation {
                 ", linkProbability=" + linkProbability +
                 ", dbpediaCategories=" + dbpediaCategories +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Annotation a){
+        return this.getTitle().compareTo(a.getTitle());
     }
 }
