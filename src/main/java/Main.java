@@ -4,8 +4,6 @@ import api.tagme4j.TagMeClient;
 import api.tagme4j.TagMeException;
 import api.tagme4j.model.Annotation;
 import api.tagme4j.model.Relatedness;
-import api.tagme4j.request.RelRequest;
-import api.tagme4j.request.TagRequest;
 import api.tagme4j.response.RelResponse;
 import api.tagme4j.response.TagResponse;
 import db.MongoCRUD;
@@ -13,6 +11,7 @@ import model.*;
 import org.jongo.MongoCursor;
 
 import weka.clusterers.SimpleKMeans;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -35,15 +34,18 @@ public class Main {
     private static int sogliaCluster3 = 1;
 
     // settare a true per eseguire i passi relativi
-    private static boolean[] passoAlgoritmo = {
+    private static boolean[] step = {
             false,
-            false,false,false,false,false,
-            false,false,false,false,false,
-            false,false,false,false,false
+            false, false, false, false, false,
+            false, true , false, true , false,
+            false, true , true , false, false
     };
+
     // settare a true per eseguire la distanza di Manhattan per i relativi cluster 0 1 2 3
     private static boolean[] manhattanDistance = { false, false, true, false };
 
+    // settare il num di cluster
+    private static int[] numCluster = {14,12,6,0};
 
     public static void main(String[] args) throws Exception {
         //System.out.print((char)27 + "[30m");
@@ -51,35 +53,60 @@ public class Main {
         //System.out.print((char)27 + "[32m");
         System.out.println("\n------------------------\tSTART\t------------------------\n");
 
-        if (passoAlgoritmo[0])
-            newsExtractionAndSave();
-        if (passoAlgoritmo[1])
-            newsCleaning();
-        if (passoAlgoritmo[2])
-            fontsExtractionAndSave();
-        if (passoAlgoritmo[3])
-            createMatrixForClustering1();
-        if (passoAlgoritmo[4])
-            annotationsExtractionAndSave();
-        if (passoAlgoritmo[5])
-            createMatrixForClustering2();
-        if (passoAlgoritmo[6])
-            calculatingRelativityForEntitiesAndSave();
-        if (passoAlgoritmo[7])
-            exportCluster0CsvArff();
-        if (passoAlgoritmo[8])
-            executeCluster0();
 
-        if (passoAlgoritmo[9])
-            createMatrixForClustering3();
-        if (passoAlgoritmo[10])
-            exportAllClusterCsvArff();
-        if (passoAlgoritmo[11])
-            executeCluster1();
-        if (passoAlgoritmo[12])
-            executeCluster2();
-        if (passoAlgoritmo[13])
+        SimpleKMeans cluster0 = null;
+        SimpleKMeans cluster1 = null;
+        SimpleKMeans cluster2 = null;
+        SimpleKMeans cluster3 = null;
+
+        Cluster cluster2_matrix = null;
+
+        if (step[0])
+            newsExtractionAndSave();
+        if (step[1])
+            newsCleaning();
+        if (step[2])
+            fontsExtractionAndSave();
+        if (step[3])
+            createMatrixForClustering1();
+        if (step[4])
+            exportClusterCsvArff(1);
+
+        // TODO execute
+        if (step[5])
+            cluster1 = executeCluster1();
+        if (step[6])
+            annotationsExtractionAndSave();
+
+        // TODO execute
+        if (step[7])
+            cluster2_matrix = createMatrixForClustering2(false);
+        if (step[8])
+            exportClusterCsvArff(2);
+
+        // TODO execute
+        if (step[9])
+            cluster2 = executeCluster2();
+        if (step[10])
+            calculatingRelativityForEntitiesAndSave();
+        if (step[11])
+            exportClusterCsvArff(0);
+
+        // TODO execute
+        if (step[12])
+            cluster0 = executeCluster0();
+
+        if (step[13])
+            createMatrixForClustering3(cluster0, cluster2_matrix);
+
+
+
+
+        if (step[14])
+            exportClusterCsvArff(3);
+        if (step[15])
             executeCluster3();
+
 
         System.out.println("\n------------------------\tEND\t\t------------------------\n");
     }
@@ -261,7 +288,7 @@ public class Main {
         System.out.println("\tSALVATAGGIO COMPLETATO\n");
     }
 
-    private static void executeCluster1() {
+    private static SimpleKMeans executeCluster1() {
 
         System.out.println("\n\tCLUSTERING1\n");
 
@@ -305,11 +332,11 @@ public class Main {
             num = num+1;
         } while (model.getSquaredError() > 0);
 
-        //System.out.println(model);
+        return model;
 
     }
 
-    private static void createMatrixForClustering2(){
+    private static Cluster createMatrixForClustering2(boolean save){
 
         MongoCRUD mongoCRUD = new MongoCRUD(realDB);
         mongoCRUD.setCollection("news2annotations");
@@ -333,11 +360,12 @@ public class Main {
             allNews2Annotation.close();
         } catch (IOException e) { }
 
-        System.out.println("\n\tSALVATAGGIO LABEL per CLUSTER2");
-        mongoCRUD.setCollection("label2");
-        mongoCRUD.saveLabel(l2c2);
-        System.out.println("\tSALVATAGGIO LABEL COMPLETATO\n");
-
+        if (save) {
+            System.out.println("\n\tSALVATAGGIO LABEL per CLUSTER2");
+            mongoCRUD.setCollection("label2");
+            mongoCRUD.saveLabel(l2c2);
+            System.out.println("\tSALVATAGGIO LABEL COMPLETATO\n");
+        }
 
         Cluster c2 = new Cluster();
         ArrayList<String> labels = l2c2.getLabelsList();
@@ -374,13 +402,15 @@ public class Main {
 
         l2c2.setCluster(c2);
 
-        System.out.println("\n\tSALVATAGGIO CLUSTER2");
-        mongoCRUD.setCollection("cluster2");
-        mongoCRUD.saveCluster(l2c2);
-        System.out.println("\tSALVATAGGIO COMPLETATO\n");
-
+        if (save) {
+            System.out.println("\n\tSALVATAGGIO CLUSTER2");
+            mongoCRUD.setCollection("cluster2");
+            mongoCRUD.saveCluster(l2c2);
+            System.out.println("\tSALVATAGGIO COMPLETATO\n");
+        }
+        return c2;
     }
-    private static void executeCluster2() {
+    private static SimpleKMeans executeCluster2() {
         System.out.println("\n\tCLUSTERING2\n");
 
         DataSource source = null;
@@ -423,10 +453,10 @@ public class Main {
             num = num+1;
         } while (model.getSquaredError() > 0);
 
-        //System.out.println(model);
+        return model;
     }
 
-    private static void executeCluster0() {
+    private static SimpleKMeans executeCluster0() {
         System.out.println("\n\tCLUSTERING0\n");
 
         DataSource source = null;
@@ -477,56 +507,68 @@ public class Main {
             }
 
             num = num+1;
-        //} while (model.getSquaredError() > 0);
+
         } while (error_pre > 2);
 
-        System.out.println(model);
+        return model;
     }
 
-    private static void createMatrixForClustering3(){
+    private static void createMatrixForClustering3(SimpleKMeans cluster0, Cluster cluster2) {
+
+        System.out.println("\n\tCREAZIONE MATRICE per CLUSTER3\n");
+
+        int num_cluster0 = cluster0.getNumClusters();
+        Instances centroidi = cluster0.getClusterCentroids();
+        Instance centroide = null;
+
+
+        for (ArrayList<Double> row : cluster2.getEntries()) {
+
+            for (int i = 0; i < num_cluster0; i++) {
+                centroide = centroidi.instance(i);
+                int value = centroide.numValues();
+
+                ArrayList<String> labels = new ArrayList<>();
+                ArrayList<Double> values = new ArrayList<>();
+                double result = 0;
+                for (int j = 0; j < value; j++) {
+                    double val = Math.floor(centroide.value(j) * 1000) / 1000;
+                    values.add(val);
+                    if (val > 0.5) {
+                        labels.add(centroide.attribute(j).name());
+                    }
+                    double vval = row.get(j);
+                    result = result + Math.floor((val*vval) * 1000) / 1000;
+                    
+                }
+                double rr = Math.floor((result/value) * 1000) / 1000;
+                System.out.print(rr + " ");
+            }
+            System.out.println();
+        }
+
+
 
     }
     private static void executeCluster3() {}
 
-    private static void exportCluster0CsvArff() {
-        System.out.println("\n\tSALVATAGGIO file CSV e ARFF\n");
-        MongoCRUD mongoCRUD = new MongoCRUD(realDB);
-        try {
-            mongoCRUD.retrieveCluster(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("\n\tSALVATAGGIO FILE CSV ARFF COMPLETATO\n");
-    }
 
-    private static void exportAllClusterCsvArff() {
+    private static void exportClusterCsvArff(int num) {
 
-        System.out.println("\n\tSALVATAGGIO file CSV e ARFF\n");
+        System.out.println("\n\tSALVATAGGIO file CSV e ARFF per il CLUSTER" + num + "\n");
 
         MongoCRUD mongoCRUD = new MongoCRUD(realDB);
-        /*
+
         try {
-            mongoCRUD.retrieveCluster(1);
+            mongoCRUD.retrieveCluster(num);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        */
-        try {
-            mongoCRUD.retrieveCluster(2);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        /*
-        try {
-            mongoCRUD.retrieveCluster(3);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        */
 
         System.out.println("\n\tSALVATAGGIO FILE CSV ARFF COMPLETATO\n");
 
     }
+
 
     private static void calculatingRelativityForEntitiesAndSave(){
 
