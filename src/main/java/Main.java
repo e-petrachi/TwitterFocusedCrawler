@@ -38,7 +38,7 @@ public class Main {
     private static boolean[] passoAlgoritmo = {
             false,
             false,false,false,false,false,
-            false,false,true,false,false,
+            false,false,false,false,false,
             false,false,false,false,false
     };
     // settare a true per eseguire la distanza di Manhattan per i relativi cluster 0 1 2 3
@@ -305,7 +305,7 @@ public class Main {
             num = num+1;
         } while (model.getSquaredError() > 0);
 
-        System.out.println(model);
+        //System.out.println(model);
 
     }
 
@@ -423,7 +423,7 @@ public class Main {
             num = num+1;
         } while (model.getSquaredError() > 0);
 
-        System.out.println(model);
+        //System.out.println(model);
     }
 
     private static void executeCluster0() {
@@ -444,7 +444,8 @@ public class Main {
 
         int num = 1;
         SimpleKMeans model;
-
+        double error_pre = 0;
+        double error = 0;
         do {
             model = new SimpleKMeans();
             try {
@@ -466,8 +467,18 @@ public class Main {
                 System.out.println("### CLUSTERING non valido!");
             }
             System.out.println("#Cluster " + num + "-> sum of squared errors : " + model.getSquaredError());
+
+            if (num > 1){
+                error_pre = error - model.getSquaredError();
+                error = model.getSquaredError();
+            } else {
+                error = model.getSquaredError();
+                error_pre = model.getSquaredError();
+            }
+
             num = num+1;
-        } while (model.getSquaredError() > 0);
+        //} while (model.getSquaredError() > 0);
+        } while (error_pre > 2);
 
         System.out.println(model);
     }
