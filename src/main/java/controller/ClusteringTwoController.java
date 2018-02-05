@@ -14,12 +14,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClusterTwoController implements ClusterController {
+public class ClusteringTwoController implements ClusteringController {
 
     private boolean realDB = true;
     private int sogliaCluster = 0;
 
-    public ClusterTwoController(boolean realDB, int sogliaCluster) {
+    public ClusteringTwoController(boolean realDB, int sogliaCluster) {
         this.realDB = realDB;
         this.sogliaCluster = sogliaCluster;
     }
@@ -32,7 +32,7 @@ public class ClusterTwoController implements ClusterController {
         MongoCursor<News2Annotations> allNews2Annotation = mongoCRUD.findAllNews2Annotations("");
 
         Label2Cluster l2c2 = new Label2Cluster(sogliaCluster);
-        System.out.println("\tCREAZIONE LABEL per CLUSTER2");
+        System.out.println("\tCREAZIONE LABEL per CLUSTERING2");
         for (News2Annotations news: allNews2Annotation){
             List<Annotation> args = news.getAnnotations();
 
@@ -49,7 +49,7 @@ public class ClusterTwoController implements ClusterController {
         } catch (IOException e) { }
 
         if (save) {
-            System.out.println("\n\tSALVATAGGIO LABEL per CLUSTER2");
+            System.out.println("\n\tSALVATAGGIO LABEL per CLUSTERING2");
             mongoCRUD.setCollection("label2");
             mongoCRUD.saveLabel(l2c2);
             System.out.println("\tSALVATAGGIO LABEL COMPLETATO\n");
@@ -58,7 +58,7 @@ public class ClusterTwoController implements ClusterController {
         Cluster c2 = new Cluster();
         ArrayList<String> labels = l2c2.getLabelsList();
 
-        System.out.println("\tCREAZIONE MATRIX per CLUSTER2\n");
+        System.out.println("\tCREAZIONE MATRICE per CLUSTERING2\n");
         mongoCRUD = new MongoCRUD(realDB);
 
         mongoCRUD.setCollection("news2annotations");
@@ -73,7 +73,7 @@ public class ClusterTwoController implements ClusterController {
             allNews2Annotation.close();
         } catch (IOException e) { }
 
-        System.out.println("\tCALCOLO valori per MATRIX\n");
+        System.out.println("\tCALCOLO valori per la MATRICE\n");
         for (News2Annotations news: allNewsList) {
             for (String annotation : labels) {
                 for (Annotation annotationExist : news.getAnnotations()) {
@@ -91,7 +91,7 @@ public class ClusterTwoController implements ClusterController {
         l2c2.setCluster(c2);
 
         if (save) {
-            System.out.println("\n\tSALVATAGGIO CLUSTER2");
+            System.out.println("\n\tSALVATAGGIO CLUSTERING2");
             mongoCRUD.setCollection("cluster2");
             mongoCRUD.saveCluster(l2c2);
             System.out.println("\tSALVATAGGIO COMPLETATO\n");

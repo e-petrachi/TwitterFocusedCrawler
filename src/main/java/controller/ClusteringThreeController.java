@@ -6,6 +6,7 @@ import api.tagme4j.model.Relatedness;
 import api.tagme4j.response.RelResponse;
 import db.MongoCRUD;
 import model.Cluster;
+import model.Label2Cluster;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -14,12 +15,12 @@ import weka.core.converters.ConverterUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClusterThreeController implements ClusterController {
+public class ClusteringThreeController implements ClusteringController {
 
     private boolean realDB = true;
     private int sogliaCluster = 0;
 
-    public ClusterThreeController(boolean realDB, int sogliaCluster) {
+    public ClusteringThreeController(boolean realDB, int sogliaCluster) {
         this.realDB = realDB;
         this.sogliaCluster = sogliaCluster;
     }
@@ -27,45 +28,109 @@ public class ClusterThreeController implements ClusterController {
 
     @Override
     public SimpleKMeans executeCluster(boolean manhattanDistance) {
-        return null;
+        System.out.println("\n\tCLUSTERING3\n");
+
+        ConverterUtils.DataSource source = null;
+        try {
+            source = new ConverterUtils.DataSource("cluster3.arff");
+        } catch (Exception e) {
+            System.out.println("### FILE ARFF non trovato!");
+        }
+        Instances data = null;
+        try {
+            data = source.getDataSet();
+        } catch (Exception e) {
+            System.out.println("### FILE ARFF non valido!");
+        }
+
+        int num = 1;
+        SimpleKMeans model;
+        do {
+            model = new SimpleKMeans();
+            try {
+                model.setNumClusters(num);
+            } catch (Exception e) {
+                System.out.println("### NUM CLUSTER non valido!");
+            }
+            if (manhattanDistance) {
+                try {
+                    model.setDistanceFunction(new weka.core.ManhattanDistance());
+                } catch (Exception e) {
+                    System.out.println("### DISTANZA di CLUSTERING non valida!");
+                }
+            }
+
+            try {
+                model.buildClusterer(data);
+            } catch (Exception e) {
+                System.out.println("### CLUSTERING non valido!");
+            }
+            System.out.println("#Cluster " + num + "-> sum of squared errors : " + model.getSquaredError());
+
+            num = num + 1;
+
+        } while (model.getSquaredError() > 0);
+
+        return model;
     }
 
     public void createMatrix(SimpleKMeans cluster0, Cluster cluster2) {
 
-        System.out.println("\n\tCREAZIONE MATRICE per CLUSTER3\n");
+        System.out.println("\n\tCREAZIONE MATRICE per CLUSTERING3\n");
 
         int num_cluster0 = cluster0.getNumClusters();
         Instances centroidi = cluster0.getClusterCentroids();
         Instance centroide = null;
 
+        Label2Cluster l2c1 = new Label2Cluster(sogliaCluster);
 
+        double[][] matrix3 = new double[cluster2.getEntries().size()][num_cluster0];
+        int k = 0;
         for (ArrayList<Double> row : cluster2.getEntries()) {
-
             for (int i = 0; i < num_cluster0; i++) {
                 centroide = centroidi.instance(i);
-                int value = centroide.numValues();
-
-                ArrayList<String> labels = new ArrayList<>();
+                int num_values = centroide.numValues();
+                int values_positive = 0;
+                String label = "";
                 ArrayList<Double> values = new ArrayList<>();
                 double result = 0;
-                for (int j = 0; j < value; j++) {
-                    double val = Math.floor(centroide.value(j) * 1000) / 1000;
-                    values.add(val);
-                    if (val > 0.5) {
-                        labels.add(centroide.attribute(j).name());
+                double maxval = 0;
+                for (int j = 0; j < num_values; j++) {
+                    double cluster_val = centroide.value(j);
+                    values.add(cluster_val);
+                    if (cluster_val > maxval) {
+                        label = centroide.attribute(j).name();
+                        maxval = cluster_val;
                     }
-                    double vval = row.get(j);
-                    result = result + Math.floor((val*vval) * 1000) / 1000;
+                    if (cluster_val > 0){
+                        values_positive++;
+                    }
+                    double news_val = row.get(j);
+                    result = result + cluster_val*news_val;
 
                 }
-                double rr = Math.floor((result/value) * 1000) / 1000;
-                System.out.print(rr + " ");
+                matrix3[k][i] = (Math.floor((result/values_positive) * 1000) / 1000);
+
+                l2c1.addLabel(label);
             }
-            System.out.println();
+            k++;
         }
 
+        l2c1.setLabelsList();
+
+        System.out.println("\tSALVATAGGIO LABEL per CLUSTERING3");
+        MongoCRUD mongoCRUD = new MongoCRUD(realDB);
+        mongoCRUD.setCollection("label3");
+        mongoCRUD.saveLabel(l2c1);
+        System.out.println("\tSALVATAGGIO LABEL COMPLETATO\n");
+
+        System.out.println("\n\tSALVATAGGIO MATRICE per CLUSTERING3");
+        mongoCRUD.setCollection("cluster3");
+        mongoCRUD.saveCluster(matrix3);
+        System.out.println("\tSALVATAGGIO COMPLETATO\n");
+
+
     }
-    public void executeCluster() {}
 
     public void createMatrix0() {
 
@@ -74,16 +139,16 @@ public class ClusterThreeController implements ClusterController {
 
         TagMeClient tagMeClient = new TagMeClient();
 
-        double[][] matrix3 = new double[labels.size()][labels.size()];
+        double[][] matrix0 = new double[labels.size()][labels.size()];
 
-        System.out.println("\tCREAZIONE MATRIX per CLUSTER di SUPPORTO\n");
+        System.out.println("\tCREAZIONE MATRIX per CLUSTERING di SUPPORTO\n");
 
         int i = 0;
         for (Long label_out : labels) {
             int j = 0;
             for (Long label_in : labels) {
                 if (i == j) {
-                    matrix3[i][j] = 1;
+                    matrix0[i][j] = 1;
                 } else {
                     RelResponse relResponse = null;
                     try {
@@ -92,16 +157,16 @@ public class ClusterThreeController implements ClusterController {
                         System.out.print(".");
                     }
                     List<Relatedness> lr = relResponse.getResult();
-                    matrix3[i][j] = (Math.floor(lr.get(0).getRel() * 1000) / 1000);
+                    matrix0[i][j] = (Math.floor(lr.get(0).getRel() * 1000) / 1000);
                 }
                 j++;
             }
             System.out.print(".");
             i++;
         }
-        System.out.println("\n\tSALVATAGGIO CLUSTER di SUPPORTO");
+        System.out.println("\n\tSALVATAGGIO CLUSTERING di SUPPORTO");
         mongoCRUD.setCollection("cluster0");
-        mongoCRUD.saveCluster(matrix3);
+        mongoCRUD.saveCluster(matrix0);
         System.out.println("\tSALVATAGGIO COMPLETATO\n");
     }
 

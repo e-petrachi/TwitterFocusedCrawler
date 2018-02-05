@@ -2,10 +2,7 @@ package db;
 
 import api.news.NLPExtractor;
 import api.news.UrlExtractor;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.MongoClient;
+import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
 import model.Label2Cluster;
 import model.News;
@@ -55,9 +52,6 @@ public class MongoCRUD {
 
     public void setCollection(String name){
         this.collection = jongo.getCollection(name);
-    }
-    public void setCollection(){
-        this.collection = jongo.getCollection("news");
     }
 
     public MongoCollection getCollection() { return this.collection; }
@@ -129,10 +123,6 @@ public class MongoCRUD {
         collection.remove("{textWithStemmer: ' '}");
     }
 
-    public News findFirstNews(String query){
-        News one = collection.findOne(query).as(News.class);
-        return one;
-    }
     public void saveCluster(Label2Cluster l2c){
         for (ArrayList<Double> cluster : l2c.getCluster().getEntries()){
             collection.save(cluster);
@@ -145,12 +135,16 @@ public class MongoCRUD {
     }
 
     public void saveLabel(Label2Cluster l2c){
+        this.clearCollection();
         collection.save(l2c.getLabelsList());
-        if (l2c.getIdsList().isEmpty())
+        if (l2c.getIdsList() == null)
             return;
         collection.save(l2c.getIdsList());
     }
 
+    public void clearCollection(){
+        collection.drop();
+    }
 
     public void saveNews2Annotations(News2Annotations news2Annotations) {
         collection.save(news2Annotations);
