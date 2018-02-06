@@ -13,6 +13,7 @@ import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ClusteringThreeController implements ClusteringController {
@@ -65,7 +66,7 @@ public class ClusteringThreeController implements ClusteringController {
             } catch (Exception e) {
                 System.out.println("### CLUSTERING non valido!");
             }
-            System.out.println("#Cluster " + num + "-> sum of squared errors : " + model.getSquaredError());
+            System.out.println("# cluster: " + num + " -> RSS: " + model.getSquaredError());
 
             num = num + 1;
 
@@ -143,25 +144,40 @@ public class ClusteringThreeController implements ClusteringController {
 
         System.out.println("\tCREAZIONE MATRIX per CLUSTERING di SUPPORTO\n");
 
+        boolean prevision = false;
+        Date now = new Date();
+        Date then = null;
+
         int i = 0;
         for (Long label_out : labels) {
             int j = 0;
             for (Long label_in : labels) {
                 if (i == j) {
                     matrix0[i][j] = 1;
+                } if (i > j){
+                    matrix0[i][j] = matrix0[j][i];
                 } else {
                     RelResponse relResponse = null;
                     try {
                         relResponse = tagMeClient.rel().id(label_in, label_out).execute();
-                    } catch (TagMeException e) {
-                        System.out.print(".");
-                    }
+                    } catch (TagMeException e) { System.out.print("."); }
+
                     List<Relatedness> lr = relResponse.getResult();
                     matrix0[i][j] = (Math.floor(lr.get(0).getRel() * 1000) / 1000);
                 }
                 j++;
             }
-            System.out.print(".");
+            if (!prevision){
+                then = new Date();
+
+                long millisDiff = (then.getTime() - now.getTime())*labels.size()/2;
+                int minutes = (int) (millisDiff / 60000 % 60);
+                int hours = (int) (millisDiff / 3600000 % 24);
+
+                System.out.println("\tTermine stimato fra circa " + hours + " ore e " + minutes + " minuti");
+                prevision = true;
+            }
+            System.out.print("*");
             i++;
         }
         System.out.println("\n\tSALVATAGGIO CLUSTERING di SUPPORTO");
@@ -210,7 +226,7 @@ public class ClusteringThreeController implements ClusteringController {
             } catch (Exception e) {
                 System.out.println("### CLUSTERING non valido!");
             }
-            System.out.println("#Cluster " + num + "-> sum of squared errors : " + model.getSquaredError());
+            System.out.println("# cluster: " + num + " -> RSS: " + model.getSquaredError());
 
             if (num > 1){
                 error_pre = error - model.getSquaredError();

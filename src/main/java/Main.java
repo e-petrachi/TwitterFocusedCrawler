@@ -19,8 +19,8 @@ public class Main {
     // settare a true per eseguire i passi relativi
     private static boolean[] step = {
             false,
-            false, false , true , true , false,
             false, false , false , false , false,
+            false, false , false , false , true,
             false, false , false , false , false
     };
 
@@ -86,6 +86,7 @@ public class Main {
         if (step[12])
             cluster0 = clusteringThreeController.executeCluster0(manhattanDistance[0]);
 
+        // TODO necessary steps 7 and 12
         if (step[13])
             clusteringThreeController.createMatrix(cluster0, cluster2_matrix);
         if (step[14])

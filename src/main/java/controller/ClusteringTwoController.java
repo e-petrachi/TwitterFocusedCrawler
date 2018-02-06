@@ -115,7 +115,7 @@ public class ClusteringTwoController implements ClusteringController {
             System.out.println("### FILE ARFF non valido!");
         }
 
-        int num = 1;
+        int num = 90;
         SimpleKMeans model;
 
         do {
@@ -138,9 +138,9 @@ public class ClusteringTwoController implements ClusteringController {
             } catch (Exception e) {
                 System.out.println("### CLUSTERING non valido!");
             }
-            System.out.println("#Cluster " + num + "-> sum of squared errors : " + model.getSquaredError());
-            num = num+1;
-        } while (model.getSquaredError() > 0);
+            System.out.println("# cluster: " + num + " -> RSS: " + model.getSquaredError());
+            num = num+2;
+        } while (model.getSquaredError() > 10);
 
         return model;
     }

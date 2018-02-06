@@ -13,6 +13,7 @@ import org.jongo.MongoCursor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -85,7 +86,7 @@ public class NewsController {
         TagMeClient tagMeClient = new TagMeClient();
         TagResponse tagResponse = null;
 
-        System.out.println("\n\tESTRAZIONE ANNOTATIONS e SALVATAGGIO");
+        System.out.println("\n\tESTRAZIONE ANNOTATIONS");
 
         ArrayList<News> all = new ArrayList<>();
         MongoCursor<News> allNews = mongoCRUD.findAllNews("");
@@ -100,10 +101,13 @@ public class NewsController {
 
         int tot = 0;
 
-        System.out.println("\tESTRAZIONE e SALVATAGGIO ANNOTAZIONI");
+        System.out.println("\tESTRAZIONE e SALVATAGGIO ANNOTAZIONI\t_lento_\n");
+
+        boolean prevision = false;
+        Date now = new Date();
+        Date then = null;
 
         for (News news : all){
-
             mongoCRUD.setCollection("news2annotations");
 
             boolean found = true;
@@ -123,9 +127,21 @@ public class NewsController {
                 }
 
                 News2Annotations n2a = new News2Annotations(news, annotations_good);
-                System.out.print("*");
                 mongoCRUD.saveNews2Annotations(n2a);
                 tot++;
+
+                if (!prevision){
+                    then = new Date();
+
+                    long millisDiff = (then.getTime() - now.getTime())*all.size();
+                    int minutes = (int) (millisDiff / 60000 % 60);
+                    int hours = (int) (millisDiff / 3600000 % 24);
+
+                    System.out.println("\tTermine stimato fra circa " + hours + " ore e " + minutes + " minuti");
+                    prevision = true;
+                }
+
+                System.out.print("*");
             }
         }
 
