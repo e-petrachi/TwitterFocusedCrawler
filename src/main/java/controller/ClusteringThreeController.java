@@ -44,7 +44,7 @@ public class ClusteringThreeController implements ClusteringController {
             System.out.println("### FILE ARFF non valido!");
         }
 
-        int num = 1;
+        int num = 50;
         SimpleKMeans model;
         do {
             model = new SimpleKMeans();
@@ -68,9 +68,9 @@ public class ClusteringThreeController implements ClusteringController {
             }
             System.out.println("# cluster: " + num + " -> RSS: " + model.getSquaredError());
 
-            num = num + 1;
+            num = num + 10;
 
-        } while (model.getSquaredError() > 0);
+        } while (model.getSquaredError() > 100);
 
         return model;
     }
@@ -85,36 +85,45 @@ public class ClusteringThreeController implements ClusteringController {
 
         Label2Cluster l2c1 = new Label2Cluster(sogliaCluster);
 
+        System.out.println("\tMATRICE " + cluster2.getEntries().size() + "x" + num_cluster0);
+
         double[][] matrix3 = new double[cluster2.getEntries().size()][num_cluster0];
+
         int k = 0;
+
         for (ArrayList<Double> row : cluster2.getEntries()) {
-            for (int i = 0; i < num_cluster0; i++) {
-                centroide = centroidi.instance(i);
-                int num_values = centroide.numValues();
-                int values_positive = 0;
-                String label = "";
-                ArrayList<Double> values = new ArrayList<>();
-                double result = 0;
-                double maxval = 0;
-                for (int j = 0; j < num_values; j++) {
-                    double cluster_val = centroide.value(j);
-                    values.add(cluster_val);
-                    if (cluster_val > maxval) {
-                        label = centroide.attribute(j).name();
-                        maxval = cluster_val;
-                    }
-                    if (cluster_val > 0){
-                        values_positive++;
-                    }
-                    double news_val = row.get(j);
-                    result = result + cluster_val*news_val;
 
+            if (row.size() > 0) {
+                for (int i = 0; i < num_cluster0; i++) {
+                    centroide = centroidi.instance(i);
+                    int num_values = centroide.numValues();
+                    int values_positive = 0;
+                    String label = "";
+                    ArrayList<Double> values = new ArrayList<>();
+                    double result = 0;
+                    double maxval = 0;
+                    for (int j = 0; j < num_values; j++) {
+                        double cluster_val = centroide.value(j);
+                        values.add(cluster_val);
+                        if (cluster_val > maxval) {
+                            label = centroide.attribute(j).name();
+                            maxval = cluster_val;
+                        }
+                        if (cluster_val > 0) {
+                            values_positive++;
+                        }
+
+                        double news_val = row.get(j);
+                        result = result + cluster_val * news_val;
+
+                    }
+                    matrix3[k][i] = (Math.floor((result / values_positive) * 1000) / 1000);
+
+                    l2c1.addLabel(label);
                 }
-                matrix3[k][i] = (Math.floor((result/values_positive) * 1000) / 1000);
+                k++;
 
-                l2c1.addLabel(label);
             }
-            k++;
         }
 
         l2c1.setLabelsList();
@@ -202,10 +211,8 @@ public class ClusteringThreeController implements ClusteringController {
             System.out.println("### FILE ARFF non valido!");
         }
 
-        int num = 1;
+        int num = 1005;
         SimpleKMeans model;
-        double error_pre = 0;
-        double error = 0;
         do {
             model = new SimpleKMeans();
             try {
@@ -228,17 +235,9 @@ public class ClusteringThreeController implements ClusteringController {
             }
             System.out.println("# cluster: " + num + " -> RSS: " + model.getSquaredError());
 
-            if (num > 1){
-                error_pre = error - model.getSquaredError();
-                error = model.getSquaredError();
-            } else {
-                error = model.getSquaredError();
-                error_pre = model.getSquaredError();
-            }
-
             num = num+1;
 
-        } while (error_pre > 2);
+        } while (model.getSquaredError() > 100);
 
         return model;
     }

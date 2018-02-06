@@ -3,6 +3,8 @@ import model.*;
 
 import weka.clusterers.SimpleKMeans;
 
+import java.util.ArrayList;
+
 public class Main {
 
     // ritrova circa 15 annotazioni per news
@@ -18,23 +20,23 @@ public class Main {
 
     // settare a true per eseguire i passi relativi
     private static boolean[] step = {
-            false,
-            false, false , false , false , false,
-            false, false , false , false , true,
-            false, false , false , false , false
+            false ,
+            false , false , false , false , false ,
+            false , false , false , false , false ,
+            false , false , false , false , true
     };
 
     // settare a true per eseguire la distanza di Manhattan per i relativi cluster 0 1 2 3
     private static boolean[] manhattanDistance = { false, false, true, false };
 
     // settare il num di cluster
-    private static int[] numCluster = {14,12,6,0};
+    private static int[] numCluster = {1006,590,50,80};
 
     public static void main(String[] args) throws Exception {
         //System.out.print((char)27 + "[30m");
         //System.out.print((char)27 + "[35m");
         //System.out.print((char)27 + "[32m");
-        System.out.println("\n------------------------\tSTART\t------------------------\n");
+        System.out.println("\n------------------------\tSTART LEARNING\t------------------------\n");
 
         NewsController newsController = new NewsController(realDB);
         ClusteringOneController clusteringOneController = new ClusteringOneController(realDB, sogliaCluster1);
@@ -67,8 +69,6 @@ public class Main {
             cluster1 = clusteringOneController.executeCluster(manhattanDistance[1]);
         if (step[6])
             newsController.annotationsExtractionAndSave(sogliaMinimaRho);
-
-        // TODO execute
         if (step[7])
             cluster2_matrix = clusteringTwoController.createMatrix(false);
         if (step[8])
@@ -81,12 +81,10 @@ public class Main {
             clusteringThreeController.createMatrix0();
         if (step[11])
             fileController.saveCluster(0);
-
-        // TODO execute
         if (step[12])
             cluster0 = clusteringThreeController.executeCluster0(manhattanDistance[0]);
 
-        // TODO necessary steps 7 and 12
+        // for this is necessary steps 7 and 12
         if (step[13])
             clusteringThreeController.createMatrix(cluster0, cluster2_matrix);
         if (step[14])
@@ -97,10 +95,22 @@ public class Main {
             cluster3 = clusteringThreeController.executeCluster(manhattanDistance[3]);
 
 
-        System.out.println("\n------------------------\tEND\t\t------------------------\n");
+        System.out.println("\n------------------------\tEND LEARNING\t------------------------\n");
+        System.out.println("\n------------------------\tSTART CLASSIFICATION\t------------------------\n");
 
+        ClassifierController classifier = new ClassifierController(cluster3);
 
+        ArrayList<String> topics = classifier.getTopics();
 
+        int i = 1;
+        for (String topic: topics) {
+            System.out.print("" + i + "|" + topic + " ");
+            if (i%5 == 0)
+                System.out.println();
+            i++;
+        }
+
+        System.out.println("\n------------------------\tEND CLASSIFICATION\t------------------------\n");
         /*
 
         TweetExtractor tweetExtractor = new TweetExtractor();
