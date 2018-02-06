@@ -170,7 +170,7 @@ public class ClusteringThreeController implements ClusteringController {
             if (!prevision){
                 then = new Date();
 
-                long millisDiff = (then.getTime() - now.getTime())*labels.size()/2;
+                long millisDiff = (then.getTime() - now.getTime())*labels.size()/4;
                 int minutes = (int) (millisDiff / 60000 % 60);
                 int hours = (int) (millisDiff / 3600000 % 24);
 
