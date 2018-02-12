@@ -48,6 +48,7 @@ public class ClusteringThreeController implements ClusteringController {
         SimpleKMeans model;
         do {
             model = new SimpleKMeans();
+            model.setPreserveInstancesOrder(true);
             try {
                 model.setNumClusters(num);
             } catch (Exception e) {
@@ -215,6 +216,8 @@ public class ClusteringThreeController implements ClusteringController {
         SimpleKMeans model;
         do {
             model = new SimpleKMeans();
+            model.setPreserveInstancesOrder(true);
+
             try {
                 model.setNumClusters(num);
             } catch (Exception e) {

@@ -19,11 +19,19 @@ public class Main {
     private static int sogliaCluster3 = 1;
 
     // settare a true per eseguire i passi relativi
-    private static boolean[] step = {
+    private static boolean[] learn_step = {
+            false ,
+            false , false , false , false , false ,
+            false , false , false , true , false ,
+            false , false , false , false , false
+    };
+
+    // settare a true per eseguire i passi relativi
+    private static boolean[] class_step = {
             false ,
             false , false , false , false , false ,
             false , false , false , false , false ,
-            false , false , false , false , true
+            false , false , false , false , false
     };
 
     // settare a true per eseguire la distanza di Manhattan per i relativi cluster 0 1 2 3
@@ -33,9 +41,6 @@ public class Main {
     private static int[] numCluster = {1006,590,50,80};
 
     public static void main(String[] args) throws Exception {
-        //System.out.print((char)27 + "[30m");
-        //System.out.print((char)27 + "[35m");
-        //System.out.print((char)27 + "[32m");
         System.out.println("\n------------------------\tSTART LEARNING\t------------------------\n");
 
         NewsController newsController = new NewsController(realDB);
@@ -52,62 +57,64 @@ public class Main {
 
         Cluster cluster2_matrix = null;
 
-        if (step[0])
+        if (learn_step[0])
             newsController.newsExtractionAndSave();
-        if (step[1])
+        if (learn_step[1])
             newsController.newsCleaning();
-        if (step[2])
+        if (learn_step[2])
             // to do remove method because increase too large the dataset
             newsController.fontsExtractionAndSave();
-        if (step[3])
+        if (learn_step[3])
             clusteringOneController.createMatrix();
-        if (step[4])
+        if (learn_step[4])
             fileController.saveCluster(1);
 
         // TODO execute
-        if (step[5])
+        if (learn_step[5])
             cluster1 = clusteringOneController.executeCluster(manhattanDistance[1]);
-        if (step[6])
+        if (learn_step[6])
             newsController.annotationsExtractionAndSave(sogliaMinimaRho);
-        if (step[7])
+        if (learn_step[7])
             cluster2_matrix = clusteringTwoController.createMatrix(false);
-        if (step[8])
+        if (learn_step[8])
             fileController.saveCluster(2);
 
         // TODO execute
-        if (step[9])
+        if (learn_step[9])
             cluster2 = clusteringTwoController.executeCluster(manhattanDistance[2]);
-        if (step[10])
+        if (learn_step[10])
             clusteringThreeController.createMatrix0();
-        if (step[11])
+        if (learn_step[11])
             fileController.saveCluster(0);
-        if (step[12])
+        if (learn_step[12])
             cluster0 = clusteringThreeController.executeCluster0(manhattanDistance[0]);
 
         // for this is necessary steps 7 and 12
-        if (step[13])
+        if (learn_step[13])
             clusteringThreeController.createMatrix(cluster0, cluster2_matrix);
-        if (step[14])
+        if (learn_step[14])
             fileController.saveCluster(3);
 
         // TODO execute
-        if (step[15])
+        if (learn_step[15])
             cluster3 = clusteringThreeController.executeCluster(manhattanDistance[3]);
 
 
         System.out.println("\n------------------------\tEND LEARNING\t------------------------\n");
         System.out.println("\n------------------------\tSTART CLASSIFICATION\t------------------------\n");
 
-        ClassifierController classifier = new ClassifierController(cluster3);
+        if (class_step[0]) {
+            ClassifierController classifier = new ClassifierController(cluster3);
 
-        ArrayList<String> topics = classifier.getTopics();
+            ArrayList<String> topics = classifier.getTopics();
 
-        int i = 1;
-        for (String topic: topics) {
-            System.out.print("" + i + "|" + topic + " ");
-            if (i%5 == 0)
-                System.out.println();
-            i++;
+            int i = 1;
+            for (String topic : topics) {
+                System.out.print("" + i + "|" + topic + " ");
+                if (i % 5 == 0)
+                    System.out.println();
+                i++;
+            }
         }
 
         System.out.println("\n------------------------\tEND CLASSIFICATION\t------------------------\n");
