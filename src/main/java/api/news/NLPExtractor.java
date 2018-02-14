@@ -9,6 +9,7 @@ import weka.filters.unsupervised.attribute.StringToWordVector;
 import org.tartarus.snowball.SnowballStemmer;
 import org.tartarus.snowball.ext.porterStemmer;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -58,18 +59,23 @@ public class NLPExtractor {
         return result;
     }
 
-    public double tfIdf(News news, List<News> newsList, String term) {
-        String[] args = news.getTextWithStemmer().split(" ");
+    public double tfIdf(News news, List<News> newsList, String term, List<String> labels) {
+        String[] arg = news.getTextWithStemmer().split(" ");
+        ArrayList<String> args = new ArrayList<>();
+        for (String a :arg) {
+           if (labels.contains(a))
+               args.add(a);
+        }
         double result = tf(args, term) * idf(newsList, term);
         return Math.floor(result * 1000) / 1000;
     }
-    public double tf(String[] doc, String term) {
+    public double tf(ArrayList<String> doc, String term) {
         double result = 0;
         for (String word : doc) {
             if (term.equalsIgnoreCase(word))
                 result++;
         }
-        return result / doc.length;
+        return result / doc.size();
     }
     public double idf(List<News> newsList, String term) {
 

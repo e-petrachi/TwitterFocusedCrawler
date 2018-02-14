@@ -7,31 +7,14 @@ import java.util.Date;
 
 public class News {
     private String title;
-
     private String description;
     private String url;
     private String text;
     private String textWithoutStopword;
     private String textWithStemmer;
-    private String urlToImage;
-    private Source source;
     private String author;
-    private Date publishedAt;
 
-    public News() {
-        this.source = new Source();
-    }
-
-    public News(Source source, String author, String title, String description, String url, String urlToImage, Date publishedAt) {
-        this.source = source;
-        this.author = author;
-        this.title = title;
-        this.description = description;
-        this.url = url;
-        this.text = "";
-        this.urlToImage = urlToImage;
-        this.publishedAt = publishedAt;
-    }
+    public News() { }
 
     public static News convertFromJSONToNews(JSONObject json) {
         if (json == null) {
@@ -61,43 +44,9 @@ public class News {
         } catch (Exception e){
             news.setUrl("");
         }
-        try {
-            news.setUrlToImage((String) json.get("urlToImage"));
-        } catch (Exception e){
-            news.setUrlToImage("");
-        }
-        try {
-            news.setPublishedAt((Date) json.get("publishedAt"));
-        } catch (Exception e){
-            news.setPublishedAt(new Date());
-        }
 
-        Source source = new Source();
-        JSONObject jo = json.getJSONObject("source");
-
-        try {
-            source.setId((String) jo.get("id"));
-        } catch (Exception e){
-            source.setId("");
-        }
-        try {
-            source.setName((String) jo.get("name"));
-        } catch (Exception e){
-            source.setName("");
-        }
-
-        news.setSource(source);
 
         return news;
-    }
-
-
-    public Source getSource() {
-        return source;
-    }
-
-    public void setSource(Source source) {
-        this.source = source;
     }
 
     public String getAuthor() {
@@ -130,22 +79,6 @@ public class News {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public String getUrlToImage() {
-        return urlToImage;
-    }
-
-    public void setUrlToImage(String urlToImage) {
-        this.urlToImage = urlToImage;
-    }
-
-    public Date getPublishedAt() {
-        return publishedAt;
-    }
-
-    public void setPublishedAt(Date publishedAt) {
-        this.publishedAt = publishedAt;
     }
 
     public String getText() {
@@ -190,7 +123,6 @@ public class News {
     @Override
     public String toString() {
         return "\n\tNews {" +
-                " source= " + source +
                 " , title= '" + title + "' }";
     }
 }

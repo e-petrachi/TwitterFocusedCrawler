@@ -75,17 +75,27 @@ public class ClusteringTwoController implements ClusteringController {
 
         System.out.println("\tCALCOLO valori per la MATRICE\n");
         for (News2Annotations news: allNewsList) {
+            double sum = 0;
             for (String annotation : labels) {
+                boolean exist = false;
                 for (Annotation annotationExist : news.getAnnotations()) {
-                    if (annotation.equalsIgnoreCase(annotationExist.getTitle())){
+                    if (annotation.equalsIgnoreCase(annotationExist.getTitle()) && !exist){
                         c2.addCurrentValue( (Math.floor(annotationExist.getLinkProbability() * 1000) / 1000) );
-                    } else {
-                        c2.addCurrentValue(0.0);
+                        sum += (Math.floor(annotationExist.getLinkProbability() * 1000) / 1000);
+                        exist = true;
                     }
                 }
+                if (!exist){
+                    c2.addCurrentValue(0.0);
+                }
             }
-            c2.addCurrentToCluster();
-            System.out.print(".");
+            if (sum > 0.0) {
+                c2.addCurrentToCluster();
+                System.out.print(".");
+            } else {
+                c2.emptyCurrentValues();
+                System.out.print("e");
+            }
         }
 
         l2c2.setCluster(c2);
@@ -115,7 +125,7 @@ public class ClusteringTwoController implements ClusteringController {
             System.out.println("### FILE ARFF non valido!");
         }
 
-        int num = 90;
+        int num = 50;
         SimpleKMeans model;
         ArrayList<Double> stats;
 
@@ -144,7 +154,7 @@ public class ClusteringTwoController implements ClusteringController {
             }
             System.out.println("\n\n\t\t" + num + " cluster -> RSS: " + model.getSquaredError());
 
-            stats = this.getStatsIntraClusters(model);
+            stats = this.getStatsIntraClusters(model, data);
 
             System.out.print("\t\tvarianza_interna_min: " + stats.get(0) + " varianza_interna_max: " + stats.get(1) + " dimensione_cluster_min: " + stats.get(2) + " dimensione_cluster_max: " + stats.get(3) + "\n");
 
@@ -158,13 +168,13 @@ public class ClusteringTwoController implements ClusteringController {
                 index++;
             }
 
-            num = num+2;
+            num = num+1;
         } while (model.getSquaredError() > 10);
 
         return model;
     }
 
-    public ArrayList<Double> getStatsIntraClusters(SimpleKMeans model){
+    public ArrayList<Double> getStatsIntraClusters(SimpleKMeans model, Instances data){
         ClassifierController cc = new ClassifierController(model);
         double[] var = cc.getSumInternalVariance();
         int min[] = cc.getMinMaxElementsOfClusters();

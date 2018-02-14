@@ -8,21 +8,21 @@ import java.util.ArrayList;
 public class Main {
 
     // ritrova circa 15 annotazioni per news
-    private static double sogliaMinimaRho = 0.2;
+    private static double sogliaMinimaLink = 0.2;
 
     // settare a false per fare test su piccole quantità di dati
-    private static boolean realDB = true;
+    private static boolean realDB = false;
 
     // settare a 0 se si vogliono salvare tutte le features
-    private static int sogliaCluster1 = 6;
-    private static int sogliaCluster2 = 2;
+    private static int sogliaCluster1 = 10;
+    private static int sogliaCluster2 = 6;
     private static int sogliaCluster3 = 1;
 
     // settare a true per eseguire i passi relativi
     private static boolean[] learn_step = {
             false ,
+            false , false /**/ , false /**/ , false , false ,
             false , false , false , false , false ,
-            false , false , false , true , false ,
             false , false , false , false , false
     };
 
@@ -35,10 +35,10 @@ public class Main {
     };
 
     // settare a true per eseguire la distanza di Manhattan per i relativi cluster 0 1 2 3
-    private static boolean[] manhattanDistance = { false, false, true, false };
+    private static boolean[] manhattanDistance = { false, false, false, false };
 
     // settare il num di cluster
-    private static int[] numCluster = {1006,590,50,80};
+    private static int[] numCluster = {38,0,0,4};
 
     public static void main(String[] args) throws Exception {
         System.out.println("\n------------------------\tSTART LEARNING\t------------------------\n");
@@ -62,18 +62,22 @@ public class Main {
         if (learn_step[1])
             newsController.newsCleaning();
         if (learn_step[2])
-            // to do remove method because increase too large the dataset
-            newsController.fontsExtractionAndSave();
-        if (learn_step[3])
             clusteringOneController.createMatrix();
-        if (learn_step[4])
+        if (learn_step[3])
             fileController.saveCluster(1);
 
         // TODO execute
-        if (learn_step[5])
+        if (learn_step[4])
             cluster1 = clusteringOneController.executeCluster(manhattanDistance[1]);
+
+        /*
+        * CLUSTERING 2
+        */
+
+        if (learn_step[5])
+            newsController.annotationsExtractionAndSave(sogliaMinimaLink);
         if (learn_step[6])
-            newsController.annotationsExtractionAndSave(sogliaMinimaRho);
+            newsController.news2AnnCleaning();
         if (learn_step[7])
             cluster2_matrix = clusteringTwoController.createMatrix(false);
         if (learn_step[8])
@@ -82,6 +86,11 @@ public class Main {
         // TODO execute
         if (learn_step[9])
             cluster2 = clusteringTwoController.executeCluster(manhattanDistance[2]);
+
+        /*
+        * CLUSTERING 3
+        */
+
         if (learn_step[10])
             clusteringThreeController.createMatrix0();
         if (learn_step[11])
@@ -89,7 +98,7 @@ public class Main {
         if (learn_step[12])
             cluster0 = clusteringThreeController.executeCluster0(manhattanDistance[0]);
 
-        // for this is necessary steps 7 and 12
+        // for this is necessary steps 7 and 12 and to remove cluster3 on db
         if (learn_step[13])
             clusteringThreeController.createMatrix(cluster0, cluster2_matrix);
         if (learn_step[14])

@@ -1,7 +1,10 @@
 package controller;
 
+import api.kvalid.SilhouetteIndex;
+import weka.clusterers.AbstractClusterer;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Attribute;
+import weka.core.DistanceFunction;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -11,6 +14,7 @@ import java.util.HashMap;
 public class ClassifierController {
     private SimpleKMeans model;
     private int num_clusters;
+
     private Instances centroidi;
     private ArrayList<Instance> instances_centroidi;
 
@@ -49,6 +53,7 @@ public class ClassifierController {
                 i++;
             }
         } catch (Exception e) { }
+
     }
 
     private ArrayList<Instance> getInstances(Instances inst){
@@ -95,17 +100,14 @@ public class ClassifierController {
         int index = 0;
         for (Integer cluster: this.cluster2elements.keySet()){
             elements[index] = this.cluster2elements.get(cluster).size();
+            /*
+            if (elements[index] == 1){
+                System.out.println("\nIndice" + this.cluster2elements.get(cluster).get(0) + "\n");
+            }
+            */
             index++;
         }
         return elements;
-    }
-    public ArrayList<Double> getVariances(){
-
-        ArrayList<Double> variances = new ArrayList<>();
-        for (int i=0; i<this.num_values; i++) {
-            variances.add(this.centroidi.variance(i));
-        }
-        return variances;
     }
 
     public double[] getSumInternalVariance(){
@@ -113,6 +115,7 @@ public class ClassifierController {
         double max = 0;
         double min = Double.MAX_VALUE;
         for (Instance internal :this.instances_stdDevs) {
+
             double sum_internal = 0;
             for (int i = 0; i <this.num_values; i++) {
                 sum_internal += (internal.value(i)*internal.value(i));
@@ -133,4 +136,9 @@ public class ClassifierController {
         return result;
     }
 
+    public void evaluate(Instances dataset) throws Exception {
+        SilhouetteIndex si = new SilhouetteIndex();
+        si.evaluate(this.model,this.centroidi,dataset, model.getDistanceFunction());
+        System.out.println(si.toString() + "\n");
+    }
 }

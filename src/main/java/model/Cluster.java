@@ -33,6 +33,9 @@ public class Cluster {
         this.entries.add(this.currentValues);
         this.currentValues = new ArrayList<>();
     }
+    public void emptyCurrentValues(){
+        this.currentValues = new ArrayList<>();
+    }
 
     @Override
     public String toString() {

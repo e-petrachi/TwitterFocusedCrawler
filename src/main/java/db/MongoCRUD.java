@@ -62,7 +62,7 @@ public class MongoCRUD {
         try {
             content = new UrlExtractor().getUrlOneLinerContent(url);
         } catch (Exception e ) {
-            System.out.println("### URL non consistente...ELIMINO NEWS!");
+            System.out.println("*url non accedibile*");
         }
         if (content != "") {
             news.setText(content);
@@ -121,6 +121,10 @@ public class MongoCRUD {
 
     public void cleanNews(){
         collection.remove("{textWithStemmer: ' '}");
+    }
+
+    public void cleanNews2Annotations(){
+        collection.remove("{ annotations.0 : { $exists: false } }");
     }
 
     public void saveCluster(Label2Cluster l2c){

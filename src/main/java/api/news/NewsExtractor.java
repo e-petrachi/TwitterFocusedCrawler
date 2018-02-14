@@ -18,17 +18,7 @@ public class NewsExtractor {
     private String language = "en";
     private int pageSize = 100;
 
-    // TODO settare la data in questo formato x 7gg fa
-    private String dateFrom = "2018-01-20";
-
-    // Settare a TRUE x estrarre + di 100 news per ogni fonte
-    private boolean depth = false;
-
     public NewsExtractor() { }
-
-    public NewsExtractor(boolean depth) {
-        this.depth = depth;
-    }
 
     public Articles getTopNews(){
 
@@ -53,54 +43,6 @@ public class NewsExtractor {
                                 .queryString("language", this.language)
                                 .queryString("pageSize", this.pageSize)
                                 .queryString("page", i)
-                                .queryString("apiKey", newsAPI)
-                                .asJson();
-                    } catch (UnirestException e) {
-                        System.out.println("------\tIl server non risponde!\t------");
-                        e.printStackTrace();
-                    }
-                    if (response != null) {
-                        Articles articles_otherPage = this.getNews(response);
-                        articles.addArticles(articles_otherPage);
-                    }
-                }
-            }
-            return articles;
-        }
-        return null;
-    }
-
-    public Articles getEverything(String title){
-        HttpResponse<JsonNode> response = null;
-        try {
-            response =  Unirest.get("https://newsapi.org/v2/everything")
-                    .queryString("sources", title)
-                    .queryString("from", this.dateFrom)
-                    .queryString("language", this.language)
-                    .queryString("pageSize", this.pageSize)
-                    .queryString("page", 1)
-                    .queryString("sortBy", "popularity")
-                    .queryString("apiKey", newsAPI)
-                    .asJson();
-        } catch (UnirestException e) {
-            System.out.println("------\tIl server non risponde!\t------");
-            e.printStackTrace();
-        }
-
-        if (response != null){
-            Articles articles = this.getNews(response);
-            if (articles == null)
-                return null;
-            if (articles.getPages() > 1 && this.depth == true){
-                for (int i=2;i<=articles.getPages();i++ ) {
-                    try {
-                        response =  Unirest.get("https://newsapi.org/v2/everything")
-                                .queryString("sources", title)
-                                .queryString("from", this.dateFrom)
-                                .queryString("language", this.language)
-                                .queryString("pageSize", this.pageSize)
-                                .queryString("page", i)
-                                .queryString("sortBy", "popularity")
                                 .queryString("apiKey", newsAPI)
                                 .asJson();
                     } catch (UnirestException e) {

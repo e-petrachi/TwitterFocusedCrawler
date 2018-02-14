@@ -18,10 +18,12 @@ public class TweetExtractor {
 
     private AccessToken accessToken;
     private Twitter twitter;
+    private TwitterStream twitterStream;
 
     public TweetExtractor(){
         this.accessToken = null;
         this.twitter = TwitterFactory.getSingleton();
+        this.twitterStream = new TwitterStreamFactory().getInstance();
     }
 
     public void auth() throws TwitterException{
@@ -69,5 +71,43 @@ public class TweetExtractor {
         }
 
         return tweets;
+    }
+    // TODO test this method
+    public void lister() throws TwitterException, IOException {
+
+        StatusListener listener = new StatusListener() {
+            @Override
+            public void onStatus(Status status) {
+                System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
+            }
+
+            @Override
+            public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+                System.out.println("Got a status deletion notice id:" + statusDeletionNotice.getStatusId());
+            }
+
+            @Override
+            public void onTrackLimitationNotice(int numberOfLimitedStatuses) {
+                System.out.println("Got track limitation notice:" + numberOfLimitedStatuses);
+            }
+
+            @Override
+            public void onScrubGeo(long userId, long upToStatusId) {
+                System.out.println("Got scrub_geo event userId:" + userId + " upToStatusId:" + upToStatusId);
+            }
+
+            @Override
+            public void onStallWarning(StallWarning warning) {
+                System.out.println("Got stall warning:" + warning);
+            }
+
+            @Override
+            public void onException(Exception ex) {
+                ex.printStackTrace();
+            }
+        };
+
+        this.twitterStream.addListener(listener);
+        this.twitterStream.sample();
     }
 }

@@ -42,35 +42,6 @@ public class NewsController {
 
     }
 
-    public void fontsExtractionAndSave() {
-        MongoCRUD mongoCRUD = this.connect2dbNews();
-
-        MongoCursor<News> top = mongoCRUD.findAllNews("");
-
-        System.out.println("\n\tESTRAZIONE TOP SOURCES");
-        TreeSet<String> sources = new TreeSet<>();
-        for (News news : top) {
-            String s = news.getSource().getId();
-            sources.add(s);
-        }
-
-        System.out.println("\n\tESTRAZIONE NEWS extra");
-        NewsExtractor extractor = new NewsExtractor();
-        for (String source : sources){
-            Articles all = extractor.getEverything(source);
-
-            if (all != null) {
-                System.out.println("\n\tSALVATAGGIO NEWS extra");
-                for (News nn: all.getArticle()) {
-                    mongoCRUD.saveNews(nn);
-                    System.out.print(".");
-                }
-            }
-        }
-        System.out.println("\tSALVATAGGIO NEWS extra COMPLETATO\n");
-
-    }
-
     public void newsCleaning() {
         System.out.println("\n\tPULIZIA NEWS");
 
@@ -80,7 +51,17 @@ public class NewsController {
         System.out.println("\tPULIZIA NEWS COMPLETATA\n");
     }
 
-    public void annotationsExtractionAndSave(double sogliaMinimaRho) {
+    public void news2AnnCleaning() {
+        System.out.println("\n\tPULIZIA NEWS2ANNOTATIONS");
+
+        MongoCRUD mongoCRUD = this.connect2dbNews();
+        mongoCRUD.setCollection("news2annotations");
+        mongoCRUD.cleanNews2Annotations();
+
+        System.out.println("\tPULIZIA NEWS2ANNOTATIONS COMPLETATA\n");
+    }
+
+    public void annotationsExtractionAndSave(double sogliaMinimaLink) {
         MongoCRUD mongoCRUD = this.connect2dbNews();
 
         TagMeClient tagMeClient = new TagMeClient();
@@ -122,7 +103,7 @@ public class NewsController {
                 List<Annotation> annotations_good = new ArrayList<>();
 
                 for (Annotation a : annotations) {
-                    if (a.getRho() > sogliaMinimaRho)
+                    if (a.getLinkProbability() > sogliaMinimaLink)
                         annotations_good.add(a);
                 }
 
