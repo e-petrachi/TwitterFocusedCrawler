@@ -109,7 +109,7 @@ public class ClusteringTwoController implements ClusteringController {
         return c2;
     }
 
-    public SimpleKMeans executeCluster(boolean manhattanDistance) {
+    public SimpleKMeans executeCluster() {
         System.out.println("\n\tCLUSTERING2\n");
 
         ConverterUtils.DataSource source = null;
@@ -139,14 +139,6 @@ public class ClusteringTwoController implements ClusteringController {
             } catch (Exception e) {
                 System.out.println("### NUM CLUSTER non valido!");
             }
-            if(manhattanDistance) {
-                try {
-                    model.setDistanceFunction(new weka.core.ManhattanDistance());
-                } catch (Exception e) {
-                    System.out.println("### DISTANZA di CLUSTERING non valida!");
-                }
-            }
-
             try {
                 model.buildClusterer(data);
             } catch (Exception e) {

@@ -1,5 +1,7 @@
 package api.twitter;
 
+import controller.FileController;
+import db.MongoCRUD;
 import twitter4j.*;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
@@ -19,6 +21,7 @@ public class TweetExtractor {
     private AccessToken accessToken;
     private Twitter twitter;
     private TwitterStream twitterStream;
+    private boolean authenticated;
 
     public TweetExtractor(){
         this.accessToken = null;
@@ -29,7 +32,6 @@ public class TweetExtractor {
     public void auth() throws TwitterException{
         twitter.setOAuthConsumer(this.apikey, this.apiSecret);
         RequestToken requestToken = twitter.getOAuthRequestToken();
-
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (null == accessToken) {
@@ -56,6 +58,13 @@ public class TweetExtractor {
                 }
             }
         }
+        storeAccessToken(accessToken);
+        Status status = twitter.updateStatus("200 OK");
+        System.out.println("Successfully updated the status to [" + status.getText() + "].");
+    }
+    private static void storeAccessToken(AccessToken accessToken){
+        FileController fileController = new FileController();
+        fileController.saveTokens(accessToken.getToken(),accessToken.getTokenSecret());
     }
     public List<String> searchTweet(String searchQuery) throws TwitterException {
 
@@ -72,15 +81,26 @@ public class TweetExtractor {
 
         return tweets;
     }
-    // TODO test this method
+
     public void lister() throws TwitterException, IOException {
+        MongoCRUD mongoCRUD = new MongoCRUD();
+        mongoCRUD.setDbName("twitterDB");
+        mongoCRUD.setCollection("en");
 
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
-            }
+                if (status.getText().split(" ").length >= 10 &&
+                        status.getText().charAt(0) != 'R' &&
+                            status.getText().charAt(1) != 'T' ) {
+                    mongoCRUD.saveTweet("@" + status.getUser().getScreenName(), status.getText());
+                    System.out.print("@" + status.getUser().getScreenName() + "\t");
+                    if (Math.random() > 0.8)
+                        System.out.print("\n");
+                }
 
+            }
+            
             @Override
             public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
                 System.out.println("Got a status deletion notice id:" + statusDeletionNotice.getStatusId());
@@ -108,6 +128,6 @@ public class TweetExtractor {
         };
 
         this.twitterStream.addListener(listener);
-        this.twitterStream.sample();
+        this.twitterStream.sample("en");
     }
 }

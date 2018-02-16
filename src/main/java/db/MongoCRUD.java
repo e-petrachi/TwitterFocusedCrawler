@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import model.Label2Cluster;
 import model.News;
 import model.News2Annotations;
+import model.Tweet;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;
@@ -32,6 +33,9 @@ public class MongoCRUD {
     static Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     static { root.setLevel(Level.ERROR); }
 
+    public MongoCRUD(){
+        this.mongo = new MongoClient( "localhost" , 27017 );
+    }
     public MongoCRUD(boolean realDB){
 
         this.mongo = new MongoClient( "localhost" , 27017 );
@@ -46,6 +50,13 @@ public class MongoCRUD {
             this.db = mongo.getDB(this.dbName);
         this.jongo = new Jongo(db);
 
+    }
+
+    public void setDbName(String dbName){
+        this.dbName = dbName;
+        this.database = mongo.getDatabase(this.dbName);
+        this.db = mongo.getDB(this.dbName);
+        this.jongo = new Jongo(db);
     }
 
     public DB getDb() { return this.db; }
@@ -144,6 +155,11 @@ public class MongoCRUD {
         if (l2c.getIdsList() == null)
             return;
         collection.save(l2c.getIdsList());
+    }
+
+    public void saveTweet(String user, String text){
+        Tweet tweet = new Tweet(user,text);
+        collection.save(tweet);
     }
 
     public void clearCollection(){

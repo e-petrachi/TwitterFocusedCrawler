@@ -26,7 +26,7 @@ public class ClusteringThreeController implements ClusteringController {
         this.sogliaCluster = sogliaCluster;
     }
 
-    public SimpleKMeans executeCluster0(boolean manhattanDistance) {
+    public SimpleKMeans executeCluster0() {
         System.out.println("\n\tCLUSTERING0\n");
 
         ConverterUtils.DataSource source = null;
@@ -55,13 +55,6 @@ public class ClusteringThreeController implements ClusteringController {
                 model.setNumClusters(num);
             } catch (Exception e) {
                 System.out.println("### NUM CLUSTER non valido!");
-            }
-            if(manhattanDistance) {
-                try {
-                    model.setDistanceFunction(new weka.core.ManhattanDistance());
-                } catch (Exception e) {
-                    System.out.println("### DISTANZA di CLUSTERING non valida!");
-                }
             }
 
             try {
@@ -93,7 +86,7 @@ public class ClusteringThreeController implements ClusteringController {
     }
 
     @Override
-    public SimpleKMeans executeCluster(boolean manhattanDistance) {
+    public SimpleKMeans executeCluster() {
         System.out.println("\n\tCLUSTERING3\n");
 
         ConverterUtils.DataSource source = null;
@@ -122,13 +115,6 @@ public class ClusteringThreeController implements ClusteringController {
                 model.setNumClusters(num);
             } catch (Exception e) {
                 System.out.println("### NUM CLUSTER non valido!");
-            }
-            if (manhattanDistance) {
-                try {
-                    model.setDistanceFunction(new weka.core.ManhattanDistance());
-                } catch (Exception e) {
-                    System.out.println("### DISTANZA di CLUSTERING non valida!");
-                }
             }
 
             try {

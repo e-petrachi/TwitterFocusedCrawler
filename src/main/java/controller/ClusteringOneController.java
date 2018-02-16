@@ -112,7 +112,7 @@ public class ClusteringOneController implements ClusteringController {
         mongoCRUD.saveCluster(l2c1);
         System.out.println("\tSALVATAGGIO COMPLETATO\n");
     }
-    public SimpleKMeans executeCluster(boolean manhattanDistance) {
+    public SimpleKMeans executeCluster() {
 
         System.out.println("\n\tCLUSTERING1\n");
 
@@ -142,13 +142,6 @@ public class ClusteringOneController implements ClusteringController {
                 model.setNumClusters(num);
             } catch (Exception e) {
                 System.out.println("### NUM CLUSTER non valido!");
-            }
-            if(manhattanDistance) {
-                try {
-                    model.setDistanceFunction(new weka.core.ManhattanDistance());
-                } catch (Exception e) {
-                    System.out.println("### DISTANZA di CLUSTERING non valida!");
-                }
             }
             try {
                 model.buildClusterer(data);

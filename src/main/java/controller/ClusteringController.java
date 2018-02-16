@@ -4,5 +4,5 @@ import weka.clusterers.SimpleKMeans;
 
 public interface ClusteringController {
 
-    SimpleKMeans executeCluster(boolean manhattanDistance);
+    SimpleKMeans executeCluster();
 }

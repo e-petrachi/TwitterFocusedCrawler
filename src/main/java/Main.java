@@ -1,3 +1,4 @@
+import api.twitter.TweetExtractor;
 import controller.*;
 import model.*;
 
@@ -29,13 +30,10 @@ public class Main {
     // settare a true per eseguire i passi relativi
     private static boolean[] class_step = {
             false ,
-            false , false , false , false , false ,
+            true , false , false , false , false ,
             false , false , false , false , false ,
             false , false , false , false , false
     };
-
-    // settare a true per eseguire la distanza di Manhattan per i relativi cluster 0 1 2 3
-    private static boolean[] manhattanDistance = { false, false, false, false };
 
     // settare il num di cluster
     private static int[] numCluster = {38,0,0,4};
@@ -68,7 +66,7 @@ public class Main {
 
         // TODO execute
         if (learn_step[4])
-            cluster1 = clusteringOneController.executeCluster(manhattanDistance[1]);
+            cluster1 = clusteringOneController.executeCluster();
 
         /*
         * CLUSTERING 2
@@ -85,7 +83,7 @@ public class Main {
 
         // TODO execute
         if (learn_step[9])
-            cluster2 = clusteringTwoController.executeCluster(manhattanDistance[2]);
+            cluster2 = clusteringTwoController.executeCluster();
 
         /*
         * CLUSTERING 3
@@ -96,7 +94,7 @@ public class Main {
         if (learn_step[11])
             fileController.saveCluster(0);
         if (learn_step[12])
-            cluster0 = clusteringThreeController.executeCluster0(manhattanDistance[0]);
+            cluster0 = clusteringThreeController.executeCluster0();
 
         // for this is necessary steps 7 and 12 and to remove cluster3 on db
         if (learn_step[13])
@@ -106,7 +104,7 @@ public class Main {
 
         // TODO execute
         if (learn_step[15])
-            cluster3 = clusteringThreeController.executeCluster(manhattanDistance[3]);
+            cluster3 = clusteringThreeController.executeCluster();
 
 
         System.out.println("\n------------------------\tEND LEARNING\t------------------------\n");
@@ -124,6 +122,10 @@ public class Main {
                     System.out.println();
                 i++;
             }
+        }
+        if (class_step[1]){
+            TweetExtractor tweetExtractor = new TweetExtractor();
+            tweetExtractor.lister();
         }
 
         System.out.println("\n------------------------\tEND CLASSIFICATION\t------------------------\n");

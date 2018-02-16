@@ -12,6 +12,7 @@ public class FileController {
     private boolean realDB = true;
     private DB db;
 
+    public FileController(){}
     public FileController(boolean realDB){
         this.realDB = realDB;
     }
@@ -118,5 +119,15 @@ public class FileController {
         System.out.println("\tDATI # " + rows);
 
         writer.close();
+    }
+    public void saveTokens(String token, String secret){
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(".env"));
+            writer.write(token + "\n");
+            writer.write(secret + "\n");
+            writer.close();
+        } catch (IOException e) { }
+
     }
 }
