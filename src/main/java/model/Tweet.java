@@ -4,6 +4,8 @@ public class Tweet {
     private String user;
     private String tweet;
 
+    public Tweet(){}
+
     public String getUser() {
         return user;
     }

@@ -18,6 +18,13 @@ public class NLPExtractor {
 
     public NLPExtractor(){}
 
+    public boolean isWord(String s){
+        if (s.length() <= 3)
+            return false;
+        if (s.contains("http"))
+            return false;
+        return true;
+    }
     public String removeStopwords(String text){
         String result = "";
 

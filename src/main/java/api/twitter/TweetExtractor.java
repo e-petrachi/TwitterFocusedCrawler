@@ -90,17 +90,16 @@ public class TweetExtractor {
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                if (status.getText().split(" ").length >= 10 &&
-                        status.getText().charAt(0) != 'R' &&
-                            status.getText().charAt(1) != 'T' ) {
+                if ( status.getText().charAt(0) != 'R' & status.getText().charAt(1) != 'T' & status.getText().charAt(3) != '@' &
+                        status.getText().split(" ").length >= 10 & status.getText().contains("#")) {
                     mongoCRUD.saveTweet("@" + status.getUser().getScreenName(), status.getText());
-                    System.out.print("@" + status.getUser().getScreenName() + "\t");
-                    if (Math.random() > 0.8)
+                    System.out.print(".");
+                    if (status.getText().length() == 280)
                         System.out.print("\n");
                 }
 
             }
-            
+
             @Override
             public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
                 System.out.println("Got a status deletion notice id:" + statusDeletionNotice.getStatusId());

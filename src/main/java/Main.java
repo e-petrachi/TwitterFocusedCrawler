@@ -1,3 +1,4 @@
+import api.twitter.TweetElaborator;
 import api.twitter.TweetExtractor;
 import controller.*;
 import model.*;
@@ -124,9 +125,13 @@ public class Main {
             }
         }
         if (class_step[1]){
-            TweetExtractor tweetExtractor = new TweetExtractor();
-            tweetExtractor.lister();
+            TweetElaborator tweetElaborator = new TweetElaborator();
+            tweetElaborator.elaborate();
         }
+        if (class_step[2]){
+
+        }
+
 
         System.out.println("\n------------------------\tEND CLASSIFICATION\t------------------------\n");
         /*

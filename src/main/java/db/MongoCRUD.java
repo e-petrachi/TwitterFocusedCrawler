@@ -4,10 +4,7 @@ import api.news.NLPExtractor;
 import api.news.UrlExtractor;
 import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
-import model.Label2Cluster;
-import model.News;
-import model.News2Annotations;
-import model.Tweet;
+import model.*;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;
@@ -19,10 +16,12 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeMap;
 
 
 public class MongoCRUD {
-    private String dbName = "twitterFC";
+    private String dbName;
     private MongoClient mongo;
     private MongoDatabase database;
     private DB db;
@@ -42,12 +41,12 @@ public class MongoCRUD {
         if (realDB == false)
             this.database = mongo.getDatabase("tfc");
         else
-            this.database = mongo.getDatabase(this.dbName);
+            this.database = mongo.getDatabase("twitterFC");
 
         if (realDB == false)
             this.db = mongo.getDB("tfc");
         else
-            this.db = mongo.getDB(this.dbName);
+            this.db = mongo.getDB("twitterFC");
         this.jongo = new Jongo(db);
 
     }
@@ -60,14 +59,18 @@ public class MongoCRUD {
     }
 
     public DB getDb() { return this.db; }
-
     public void setCollection(String name){
         this.collection = jongo.getCollection(name);
     }
-
+    public String getCollectionName(){ return this.collection.getName(); }
     public MongoCollection getCollection() { return this.collection; }
 
     public void saveNews(News news){
+        if (!this.getCollectionName().equalsIgnoreCase("news")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+
         String url = news.getUrl();
         String content = "";
         try {
@@ -131,25 +134,49 @@ public class MongoCRUD {
     }
 
     public void cleanNews(){
+        if (!this.getCollectionName().equalsIgnoreCase("news")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+
         collection.remove("{textWithStemmer: ' '}");
     }
 
     public void cleanNews2Annotations(){
+        if (!this.getCollectionName().equalsIgnoreCase("news2annotations")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+
         collection.remove("{ annotations.0 : { $exists: false } }");
     }
 
     public void saveCluster(Label2Cluster l2c){
+        if (!this.getCollectionName().matches("cluster[0-9]")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
         for (ArrayList<Double> cluster : l2c.getCluster().getEntries()){
             collection.save(cluster);
         }
     }
     public void saveCluster(double[][] matrix){
+        if (!this.getCollectionName().matches("cluster[0-9]")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+
         for (double[] row : matrix){
             collection.save(row);
         }
     }
 
     public void saveLabel(Label2Cluster l2c){
+        if (!this.getCollectionName().matches("label[0-9]")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+
         this.clearCollection();
         collection.save(l2c.getLabelsList());
         if (l2c.getIdsList() == null)
@@ -158,6 +185,11 @@ public class MongoCRUD {
     }
 
     public void saveTweet(String user, String text){
+        if (!this.getCollectionName().equalsIgnoreCase("en")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+
         Tweet tweet = new Tweet(user,text);
         collection.save(tweet);
     }
@@ -170,4 +202,40 @@ public class MongoCRUD {
         collection.save(news2Annotations);
     }
 
+    public void convertTweetsInWords(ArrayList<Tweet> tweets){
+        if (!this.getCollectionName().equalsIgnoreCase("word")) {
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+        NLPExtractor nlpExtractor = new NLPExtractor();
+        TreeMap<String, Integer> word2vec = new TreeMap<>();
+
+        for (Tweet t: tweets){
+            String cleaned =  nlpExtractor.removeStopwords(t.getTweet());
+            for (String s :cleaned.split("[^A-Za-z]")) {
+                if (nlpExtractor.isWord(s)) {
+                    if (word2vec.get(s) == null)
+                        word2vec.put(s, 1);
+                    else
+                        word2vec.put(s, word2vec.get(s) + 1);
+                }
+            }
+        }
+
+        Word2Vec w2v = new Word2Vec(word2vec);
+        collection.save(w2v);
+    }
+
+    public ArrayList<Tweet> findAllTweets(){
+        if (!this.getCollectionName().equalsIgnoreCase("en")){
+            System.out.println("\n\nCollections sbagliata!");
+            return null;
+        }
+        MongoCursor<Tweet> all = collection.find().as(Tweet.class);
+        ArrayList<Tweet> tweetArrayList = new ArrayList<>();
+        for (Tweet t: all) {
+            tweetArrayList.add(t);
+        }
+        return  tweetArrayList;
+    }
 }
