@@ -39,8 +39,11 @@ public class Main {
     // settare il num di cluster
     private static int[] numCluster = {38,0,0,4};
 
+    // settare a 0 se si vogliono salvare tutte le parole
+    private static int sogliaMinimaWords = 10;
+
     public static void main(String[] args) throws Exception {
-        System.out.println("\n------------------------\tSTART LEARNING\t------------------------\n");
+        System.out.println("\n------------------------\tSTART LEARNING TOPIC\t------------------------\n");
 
         NewsController newsController = new NewsController(realDB);
         ClusteringOneController clusteringOneController = new ClusteringOneController(realDB, sogliaCluster1);
@@ -108,7 +111,7 @@ public class Main {
             cluster3 = clusteringThreeController.executeCluster();
 
 
-        System.out.println("\n------------------------\tEND LEARNING\t------------------------\n");
+        System.out.println("\n------------------------\tEND LEARNING TOPIC\t------------------------\n");
         System.out.println("\n------------------------\tSTART CLASSIFICATION\t------------------------\n");
 
         if (class_step[0]) {
@@ -126,7 +129,8 @@ public class Main {
         }
         if (class_step[1]){
             TweetElaborator tweetElaborator = new TweetElaborator();
-            tweetElaborator.elaborate();
+            //tweetElaborator.elaborate();
+            tweetElaborator.word2vec(sogliaMinimaWords);
         }
         if (class_step[2]){
 

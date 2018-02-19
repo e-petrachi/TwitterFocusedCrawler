@@ -184,6 +184,14 @@ public class MongoCRUD {
         collection.save(l2c.getIdsList());
     }
 
+    public void saveTweet2Hashtag(Tweet2Hashtag t2h){
+        if (!this.getCollectionName().equalsIgnoreCase("tweet2hashtag")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+
+        collection.save(t2h);
+    }
     public void saveTweet(String user, String text){
         if (!this.getCollectionName().equalsIgnoreCase("en")){
             System.out.println("\n\nCollections sbagliata!");
@@ -202,7 +210,24 @@ public class MongoCRUD {
         collection.save(news2Annotations);
     }
 
-    public void convertTweetsInWords(ArrayList<Tweet> tweets){
+    public void convertTweets(ArrayList<Tweet> tweets){
+        if (!this.getCollectionName().equalsIgnoreCase("tweet2hashtag")) {
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+
+        NLPExtractor nlpExtractor = new NLPExtractor();
+        for (Tweet t: tweets) {
+            Tweet2Hashtag t2h = new Tweet2Hashtag();
+            ArrayList al = nlpExtractor.extractHashtag(t.getTweet());
+            t2h.setHashtags(al);
+            String tw = nlpExtractor.removeHashtag(t.getTweet());
+            t2h.setTweet(tw);
+            this.saveTweet2Hashtag(t2h);
+        }
+
+    }
+    public void convertTweetsInWords(ArrayList<Tweet2Hashtag> tweets, int sogliaMinima){
         if (!this.getCollectionName().equalsIgnoreCase("word")) {
             System.out.println("\n\nCollections sbagliata!");
             return;
@@ -210,7 +235,7 @@ public class MongoCRUD {
         NLPExtractor nlpExtractor = new NLPExtractor();
         TreeMap<String, Integer> word2vec = new TreeMap<>();
 
-        for (Tweet t: tweets){
+        for (Tweet2Hashtag t: tweets){
             String cleaned =  nlpExtractor.removeStopwords(t.getTweet());
             for (String s :cleaned.split("[^A-Za-z]")) {
                 if (nlpExtractor.isWord(s)) {
@@ -222,7 +247,7 @@ public class MongoCRUD {
             }
         }
 
-        Word2Vec w2v = new Word2Vec(word2vec);
+        Word2Vec w2v = new Word2Vec(word2vec,sogliaMinima);
         collection.save(w2v);
     }
 
@@ -234,6 +259,19 @@ public class MongoCRUD {
         MongoCursor<Tweet> all = collection.find().as(Tweet.class);
         ArrayList<Tweet> tweetArrayList = new ArrayList<>();
         for (Tweet t: all) {
+            tweetArrayList.add(t);
+        }
+        return  tweetArrayList;
+    }
+
+    public ArrayList<Tweet2Hashtag> findAllTweets2Hashtag(){
+        if (!this.getCollectionName().equalsIgnoreCase("tweet2hashtag")){
+            System.out.println("\n\nCollections sbagliata!");
+            return null;
+        }
+        MongoCursor<Tweet2Hashtag> all = collection.find().as(Tweet2Hashtag.class);
+        ArrayList<Tweet2Hashtag> tweetArrayList = new ArrayList<>();
+        for (Tweet2Hashtag t: all) {
             tweetArrayList.add(t);
         }
         return  tweetArrayList;

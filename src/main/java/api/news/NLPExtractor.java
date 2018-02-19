@@ -16,7 +16,13 @@ import java.util.Vector;
 
 public class NLPExtractor {
 
-    public NLPExtractor(){}
+    private Stopwords stopwords;
+    private Enumeration enm;
+
+    public NLPExtractor(){
+        this.stopwords = new Stopwords();
+        this.enm = this.stopwords.elements();
+    }
 
     public boolean isWord(String s){
         if (s.length() <= 3)
@@ -27,9 +33,6 @@ public class NLPExtractor {
     }
     public String removeStopwords(String text){
         String result = "";
-
-        Stopwords stopwords = new Stopwords();
-        Enumeration enm = stopwords.elements();
 
         String[] args = text.split("[^A-Za-z]");
 
@@ -98,5 +101,36 @@ public class NLPExtractor {
             }
         }
         return Math.log(tot / n);
+    }
+
+    public ArrayList<String> extractHashtag(String tweet){
+        ArrayList<String> hashtag = new ArrayList<>();
+
+        String[] arg = tweet.split(" ");
+        for (String s : arg){
+            if (s.contains("#") && !s.contains("http")){
+                String sc = this.removeStopwords(s);
+                hashtag.add(sc);
+            }
+        }
+
+        return hashtag;
+    }
+
+    public String removeHashtag(String tweet){
+
+        String result = "";
+
+        String[] arg = tweet.split(" ");
+        for (String s : arg){
+            if (!s.contains("#") && !s.contains("@") && this.isWord(s)) {
+                String sc = this.removeStopwords(s);
+                if (sc.length() > 3) {
+                    result += sc + "";
+                }
+            }
+        }
+
+        return result;
     }
 }
