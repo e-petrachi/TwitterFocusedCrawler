@@ -125,7 +125,7 @@ public class Main {
             System.out.println("\n\tBACKGROUND CREATO su " + common);
         }
         if (true){
-            tweetElaborator.createWord2vec(sogliaMinimaWords);
+            tweetElaborator.createWord2weight(sogliaMinimaWords);
         }
 
 

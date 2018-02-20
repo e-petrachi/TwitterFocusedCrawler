@@ -32,14 +32,13 @@ public class TweetElaborator {
         mongoCRUD.setCollection("hashtag2vec");
         mongoCRUD.convertTweet2HashtagInHashtag(tweets, soglia);
     }
-    public void createWord2vec(int soglia){
+    public void createWord2weight(int soglia){
         MongoCRUD mongoCRUD = new MongoCRUD();
         mongoCRUD.setDbName("twitterDB");
         mongoCRUD.setCollection("tweetONtopic");
 
         ArrayList<Tweet2Hashtag> tweets = mongoCRUD.findAllTweets2Hashtag();
 
-        // TODO fix here
         mongoCRUD.setCollection("wordsONtopic");
         mongoCRUD.clearCollection();
         mongoCRUD.convertTweetsInWords(tweets, soglia);
@@ -74,9 +73,9 @@ public class TweetElaborator {
                 //System.out.println(t + " : " + hashtag);
                 if (this.compareTopicToHashtag(hashtag,t))
                     return hashtag;
+
             }
         }
-
         return null;
     }
 

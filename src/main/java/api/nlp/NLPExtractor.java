@@ -44,14 +44,14 @@ public class NLPExtractor {
 
         if (words.size() > 0) {
             for (int i = 0; i < words.size(); i++) {
-                if (!stopwords.is(words.get(i).toString())){
+                if (!stopwords.is(words.get(i).toString()) && !words.get(i).toString().contains("http")){
                     String word = (String) words.get(i);
                     result += word.toLowerCase() + " ";
                 }
             }
         }
 
-        return result;
+        return result.substring(0,result.length()-1);
 
     }
     public String stemming(String textStopped){
@@ -140,7 +140,8 @@ public class NLPExtractor {
         ArrayList<StringList> stringListArrayList = new ArrayList<>();
 
         for (String string: backgroundWords) {
-            StringList s = new StringList(string.split(" "));
+            //StringList s = new StringList(string.split(" "));
+            StringList s = new StringList(string);
             stringListArrayList.add(s);
         }
         NGramUtils nGramUtils = new NGramUtils();

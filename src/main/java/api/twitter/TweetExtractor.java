@@ -1,6 +1,7 @@
 package api.twitter;
 
 import controller.FileController;
+import controller.TwitterSmoothingController;
 import db.MongoCRUD;
 import twitter4j.*;
 import twitter4j.auth.AccessToken;
@@ -124,6 +125,44 @@ public class TweetExtractor {
             public void onException(Exception ex) {
                 ex.printStackTrace();
             }
+        };
+
+        this.twitterStream.addListener(listener);
+        this.twitterStream.sample("en");
+    }
+
+    public void listenSmooth() throws TwitterException, IOException {
+        MongoCRUD mongoCRUD = new MongoCRUD();
+        mongoCRUD.setDbName("twitterDB");
+        mongoCRUD.setCollection("smooth");
+
+        TwitterSmoothingController tsc = new TwitterSmoothingController();
+
+        StatusListener listener = new StatusListener() {
+            @Override
+            public void onStatus(Status status) {
+                System.out.print(".");
+                if (tsc.check(status.getText())) {
+                    //mongoCRUD.saveTweet("@" + status.getUser().getScreenName(), status.getText());
+                    tsc.saveHistory(status.getText());
+                }
+
+            }
+
+            @Override
+            public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {}
+
+            @Override
+            public void onTrackLimitationNotice(int numberOfLimitedStatuses) {}
+
+            @Override
+            public void onScrubGeo(long userId, long upToStatusId) {}
+
+            @Override
+            public void onStallWarning(StallWarning warning) {}
+
+            @Override
+            public void onException(Exception ex) {}
         };
 
         this.twitterStream.addListener(listener);
