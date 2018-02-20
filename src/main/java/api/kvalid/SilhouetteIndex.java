@@ -3,14 +3,18 @@ package api.kvalid;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 
+import weka.clusterers.SimpleKMeans;
 import weka.core.DistanceFunction;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.clusterers.AbstractClusterer;
 
 public class SilhouetteIndex {
+
+	private HashMap<Integer, ArrayList<Integer>> cluster2elements;
 
 	/** Clusters SI. */
 	protected ArrayList<Double> m_clustersSilhouette;
@@ -20,6 +24,7 @@ public class SilhouetteIndex {
 
 	/** Default constructor. */
 	public SilhouetteIndex() {
+        this.cluster2elements = new HashMap<>();
 		m_clustersSilhouette = new ArrayList<Double>();
 		m_globalSilhouette = 0.0;
 	}
@@ -29,6 +34,9 @@ public class SilhouetteIndex {
 
 		if (clusterer == null || instances == null)
 			throw new Exception("SilhouetteIndex: the clusterer or instances are null!");
+
+		if (clusterer instanceof SimpleKMeans)
+		    this.setDimension((SimpleKMeans) clusterer);
 
 		/*
 		 * Attributes each instance to your centroid.
@@ -124,8 +132,6 @@ public class SilhouetteIndex {
 				centroidSilhouetteIndex += pointSilhouetteIndex;
 			}
 
-			// TODO write () -1);
-			//centroidSilhouetteIndex /= (clusteredInstances[i].size() -1);
 
 			centroidSilhouetteIndex = centroidSilhouetteIndex / (clusteredInstances[i].size() -1 );
 			if (Double.compare(centroidSilhouetteIndex, Double.NaN) == 0)
@@ -138,7 +144,35 @@ public class SilhouetteIndex {
 		m_globalSilhouette /= m_clustersSilhouette.size();
 	}
 
-	public ArrayList<Double> getClustersSilhouette() {
+    private void setDimension(SimpleKMeans clusterer) {
+        try {
+            int[] assignments = clusterer.getAssignments();
+            int i = 0;
+            for (int cluster: assignments){
+                if (this.cluster2elements.containsKey(cluster)) {
+                    ArrayList<Integer> elements = this.cluster2elements.get(cluster);
+                    elements.add(i);
+                } else{
+                    ArrayList<Integer> elements = new ArrayList<>();
+                    elements.add(i);
+                    this.cluster2elements.put(cluster, elements);
+                }
+                i++;
+            }
+        } catch (Exception e) { }
+    }
+    public int[] getNumElementsForCluster(){
+
+        int[] elements = new int[this.cluster2elements.keySet().size()];
+        int index = 0;
+        for (Integer cluster: this.cluster2elements.keySet()){
+            elements[index] = this.cluster2elements.get(cluster).size();
+            index++;
+        }
+        return elements;
+    }
+
+    public ArrayList<Double> getClustersSilhouette() {
 		return m_clustersSilhouette;
 	}
 
@@ -163,13 +197,16 @@ public class SilhouetteIndex {
 
 	 @Override
 	 public String toString() {
+
+        int[] elements = this.getNumElementsForCluster();
+
 	 	StringBuffer description = new StringBuffer("");
 
 		/* Clusters. */
 		for (int i = 0; i < m_clustersSilhouette.size(); i++) {
 			double si = m_clustersSilhouette.get(i);
 			description.append("   Cluster " + (i+1) + ": " + String.format(Locale.US, "%.4f", si)
-				+ ", veredict: " + evalSilhouette(si) + "\n");
+				+ ", size: "+ elements[i] + ", veredict: " + evalSilhouette(si) + "\n");
 		}
 
 		description.append("   Mean: " + String.format(Locale.US, "%.4f", m_globalSilhouette)

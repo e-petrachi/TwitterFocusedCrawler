@@ -9,16 +9,13 @@ import java.io.*;
 
 public class FileController {
 
-    private boolean realDB = true;
     private DB db;
 
     public FileController(){}
-    public FileController(boolean realDB){
-        this.realDB = realDB;
-    }
 
     public void saveCluster(int num) throws IOException {
-        MongoCRUD mongoCRUD = new MongoCRUD(this.realDB);
+        MongoCRUD mongoCRUD = new MongoCRUD();
+        mongoCRUD.setDbName("tfc");
         this.db = mongoCRUD.getDb();
 
         this.saveCSV(num);

@@ -1,4 +1,4 @@
-package api.news;
+package api.nlp;
 
 import model.Articles;
 import model.News;
@@ -46,7 +46,7 @@ public class NLPExtractor {
             for (int i = 0; i < words.size(); i++) {
                 if (!stopwords.is(words.get(i).toString())){
                     String word = (String) words.get(i);
-                    result = result + " " + word.toLowerCase();
+                    result += word.toLowerCase() + " ";
                 }
             }
         }
@@ -110,7 +110,9 @@ public class NLPExtractor {
         for (String s : arg){
             if (s.contains("#") && !s.contains("http")){
                 String sc = this.removeStopwords(s);
-                hashtag.add(sc);
+                String sclean = sc.replaceAll(" ","");
+                if (sclean.length() > 2)
+                    hashtag.add(sclean);
             }
         }
 
@@ -132,5 +134,16 @@ public class NLPExtractor {
         }
 
         return result;
+    }
+
+    public double calculateBackgroundProbability(String word, ArrayList<String> backgroundWords){
+        ArrayList<StringList> stringListArrayList = new ArrayList<>();
+
+        for (String string: backgroundWords) {
+            StringList s = new StringList(string.split(" "));
+            stringListArrayList.add(s);
+        }
+        NGramUtils nGramUtils = new NGramUtils();
+        return nGramUtils.calculateUnigramMLProbability(word, stringListArrayList);
     }
 }

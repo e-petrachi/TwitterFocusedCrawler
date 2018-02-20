@@ -19,11 +19,7 @@ import java.util.TreeSet;
 
 public class NewsController {
 
-    private boolean realDB = true;
-
-    public NewsController(boolean realDB){
-        this.realDB = realDB;
-    }
+    public NewsController(){ }
 
     public void newsExtractionAndSave() {
         System.out.println("\n\tESTRAZIONE TOP NEWS");
@@ -131,7 +127,8 @@ public class NewsController {
     }
 
     private MongoCRUD connect2dbNews(){
-        MongoCRUD mongoCRUD = new MongoCRUD(this.realDB);
+        MongoCRUD mongoCRUD = new MongoCRUD();
+        mongoCRUD.setDbName("tfc");
         mongoCRUD.setCollection("news");
         return mongoCRUD;
     }

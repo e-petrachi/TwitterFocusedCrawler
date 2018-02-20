@@ -1,5 +1,6 @@
 package controller;
 
+import api.kvalid.SilhouetteIndex;
 import api.tagme4j.model.Annotation;
 import db.MongoCRUD;
 import model.Cluster;
@@ -16,17 +17,16 @@ import java.util.List;
 
 public class ClusteringTwoController implements ClusteringController {
 
-    private boolean realDB = true;
     private int sogliaCluster = 0;
 
-    public ClusteringTwoController(boolean realDB, int sogliaCluster) {
-        this.realDB = realDB;
+    public ClusteringTwoController(int sogliaCluster) {
         this.sogliaCluster = sogliaCluster;
     }
 
     public Cluster createMatrix(boolean save){
 
-        MongoCRUD mongoCRUD = new MongoCRUD(realDB);
+        MongoCRUD mongoCRUD = new MongoCRUD();
+        mongoCRUD.setDbName("tfc");
         mongoCRUD.setCollection("news2annotations");
 
         MongoCursor<News2Annotations> allNews2Annotation = mongoCRUD.findAllNews2Annotations("");
@@ -59,7 +59,8 @@ public class ClusteringTwoController implements ClusteringController {
         ArrayList<String> labels = l2c2.getLabelsList();
 
         System.out.println("\tCREAZIONE MATRICE per CLUSTERING2\n");
-        mongoCRUD = new MongoCRUD(realDB);
+        mongoCRUD = new MongoCRUD();
+        mongoCRUD.setDbName("tfc");
 
         mongoCRUD.setCollection("news2annotations");
         allNews2Annotation = mongoCRUD.findAllNews2Annotations("");
@@ -146,19 +147,7 @@ public class ClusteringTwoController implements ClusteringController {
             }
             System.out.println("\n\n\t\t" + num + " cluster -> RSS: " + model.getSquaredError());
 
-            stats = this.getStatsIntraClusters(model, data);
-
-            System.out.print("\t\tvarianza_interna_min: " + stats.get(0) + " varianza_interna_max: " + stats.get(1) + " dimensione_cluster_min: " + stats.get(2) + " dimensione_cluster_max: " + stats.get(3) + "\n");
-
-            int index = 0;
-            for (Double stat : stats){
-                if(index > 3){
-                    System.out.print("cl" + (index-3) + ": " + stat.intValue() + " elem.\t");
-                }
-                if (index != 0 && index % 10 == 0)
-                    System.out.println();
-                index++;
-            }
+            this.getStatsClusters(model, data);
 
             num = num+1;
         } while (model.getSquaredError() > 10);
@@ -166,21 +155,13 @@ public class ClusteringTwoController implements ClusteringController {
         return model;
     }
 
-    public ArrayList<Double> getStatsIntraClusters(SimpleKMeans model, Instances data){
-        ClassifierController cc = new ClassifierController(model);
-        double[] var = cc.getSumInternalVariance();
-        int min[] = cc.getMinMaxElementsOfClusters();
-        int elements[] = cc.getNumElementsForCluster();
-
-        ArrayList<Double> stats = new ArrayList<>();
-        stats.add(var[0]);
-        stats.add(var[1]);
-        stats.add((double) min[0]);
-        stats.add((double) min[1]);
-        for (int i :elements){
-            stats.add((double) i);
+    public void getStatsClusters(SimpleKMeans model, Instances data){
+        SilhouetteIndex si = new SilhouetteIndex();
+        try {
+            si.evaluate(model,model.getClusterCentroids(),data, model.getDistanceFunction());
+        } catch (Exception e) {
+            System.out.println("e");
         }
-
-        return stats;
+        System.out.println(si.toString() + "\n");
     }
 }

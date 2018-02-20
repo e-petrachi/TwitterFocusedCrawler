@@ -1,5 +1,4 @@
 import api.twitter.TweetElaborator;
-import api.twitter.TweetExtractor;
 import controller.*;
 import model.*;
 
@@ -12,29 +11,10 @@ public class Main {
     // ritrova circa 15 annotazioni per news
     private static double sogliaMinimaLink = 0.2;
 
-    // settare a false per fare test su piccole quantità di dati
-    private static boolean realDB = false;
-
     // settare a 0 se si vogliono salvare tutte le features
     private static int sogliaCluster1 = 10;
     private static int sogliaCluster2 = 6;
     private static int sogliaCluster3 = 1;
-
-    // settare a true per eseguire i passi relativi
-    private static boolean[] learn_step = {
-            false ,
-            false , false /**/ , false /**/ , false , false ,
-            false , false , false , false , false ,
-            false , false , false , false , false
-    };
-
-    // settare a true per eseguire i passi relativi
-    private static boolean[] class_step = {
-            false ,
-            true , false , false , false , false ,
-            false , false , false , false , false ,
-            false , false , false , false , false
-    };
 
     // settare il num di cluster
     private static int[] numCluster = {38,0,0,4};
@@ -42,15 +22,18 @@ public class Main {
     // settare a 0 se si vogliono salvare tutte le parole
     private static int sogliaMinimaWords = 10;
 
+    // settare a 0 se si vogliono salvare tutti gli hashtag
+    private static int sogliaMinimaHashtag = 100;
+
     public static void main(String[] args) throws Exception {
         System.out.println("\n------------------------\tSTART LEARNING TOPIC\t------------------------\n");
 
-        NewsController newsController = new NewsController(realDB);
-        ClusteringOneController clusteringOneController = new ClusteringOneController(realDB, sogliaCluster1);
-        ClusteringTwoController clusteringTwoController = new ClusteringTwoController(realDB, sogliaCluster2);
-        ClusteringThreeController clusteringThreeController = new ClusteringThreeController(realDB, sogliaCluster3);
+        NewsController newsController = new NewsController();
+        ClusteringOneController clusteringOneController = new ClusteringOneController(sogliaCluster1);
+        ClusteringTwoController clusteringTwoController = new ClusteringTwoController(sogliaCluster2);
+        ClusteringThreeController clusteringThreeController = new ClusteringThreeController(sogliaCluster3);
 
-        FileController fileController = new FileController(realDB);
+        FileController fileController = new FileController();
 
         SimpleKMeans cluster0 = null;
         SimpleKMeans cluster1 = null;
@@ -59,65 +42,68 @@ public class Main {
 
         Cluster cluster2_matrix = null;
 
-        if (learn_step[0])
+        if (false)
             newsController.newsExtractionAndSave();
-        if (learn_step[1])
+        if (false)
             newsController.newsCleaning();
-        if (learn_step[2])
+        if (false)
             clusteringOneController.createMatrix();
-        if (learn_step[3])
+        if (false)
             fileController.saveCluster(1);
 
         // TODO execute
-        if (learn_step[4])
+        if (false)
             cluster1 = clusteringOneController.executeCluster();
 
         /*
         * CLUSTERING 2
         */
 
-        if (learn_step[5])
+        if (false)
             newsController.annotationsExtractionAndSave(sogliaMinimaLink);
-        if (learn_step[6])
+        if (false)
             newsController.news2AnnCleaning();
-        if (learn_step[7])
+        if (false)
             cluster2_matrix = clusteringTwoController.createMatrix(false);
-        if (learn_step[8])
+        if (false)
             fileController.saveCluster(2);
 
         // TODO execute
-        if (learn_step[9])
+        if (false)
             cluster2 = clusteringTwoController.executeCluster();
 
         /*
         * CLUSTERING 3
         */
 
-        if (learn_step[10])
+        if (false)
             clusteringThreeController.createMatrix0();
-        if (learn_step[11])
+        if (false)
             fileController.saveCluster(0);
-        if (learn_step[12])
+        if (false)
             cluster0 = clusteringThreeController.executeCluster0();
 
         // for this is necessary steps 7 and 12 and to remove cluster3 on db
-        if (learn_step[13])
+        if (false)
             clusteringThreeController.createMatrix(cluster0, cluster2_matrix);
-        if (learn_step[14])
+        if (false)
             fileController.saveCluster(3);
 
         // TODO execute
-        if (learn_step[15])
+        if (false)
             cluster3 = clusteringThreeController.executeCluster();
 
 
         System.out.println("\n------------------------\tEND LEARNING TOPIC\t------------------------\n");
-        System.out.println("\n------------------------\tSTART CLASSIFICATION\t------------------------\n");
+        System.out.println("\n------------------------\tSTART LEARNING TWEET\t------------------------\n");
 
-        if (class_step[0]) {
+        TweetElaborator tweetElaborator = new TweetElaborator();
+        ArrayList<String> topics;
+
+        if (false) {
             ClassifierController classifier = new ClassifierController(cluster3);
 
-            ArrayList<String> topics = classifier.getTopics();
+            topics = classifier.getTopics();
 
             int i = 1;
             for (String topic : topics) {
@@ -127,17 +113,23 @@ public class Main {
                 i++;
             }
         }
-        if (class_step[1]){
-            TweetElaborator tweetElaborator = new TweetElaborator();
-            //tweetElaborator.elaborate();
-            tweetElaborator.word2vec(sogliaMinimaWords);
+        if (false){
+            tweetElaborator.elaborateBackground();
+            tweetElaborator.createHashtag2vec(sogliaMinimaHashtag);
         }
-        if (class_step[2]){
+        if (false){
+            String common = tweetElaborator.findCommonTopic(topics);
 
+            System.out.println("\n\tTOPIC TROVATO: " + common);
+            tweetElaborator.createBackgroundForTopic(common);
+            System.out.println("\n\tBACKGROUND CREATO su " + common);
+        }
+        if (true){
+            tweetElaborator.createWord2vec(sogliaMinimaWords);
         }
 
 
-        System.out.println("\n------------------------\tEND CLASSIFICATION\t------------------------\n");
+        System.out.println("\n------------------------\tEND LEARNING TWEET\t------------------------\n");
         /*
 
         TweetExtractor tweetExtractor = new TweetExtractor();

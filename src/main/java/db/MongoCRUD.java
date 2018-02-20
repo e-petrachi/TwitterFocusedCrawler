@@ -1,6 +1,6 @@
 package db;
 
-import api.news.NLPExtractor;
+import api.nlp.NLPExtractor;
 import api.news.UrlExtractor;
 import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
@@ -12,11 +12,7 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 
@@ -34,21 +30,6 @@ public class MongoCRUD {
 
     public MongoCRUD(){
         this.mongo = new MongoClient( "localhost" , 27017 );
-    }
-    public MongoCRUD(boolean realDB){
-
-        this.mongo = new MongoClient( "localhost" , 27017 );
-        if (realDB == false)
-            this.database = mongo.getDatabase("tfc");
-        else
-            this.database = mongo.getDatabase("twitterFC");
-
-        if (realDB == false)
-            this.db = mongo.getDB("tfc");
-        else
-            this.db = mongo.getDB("twitterFC");
-        this.jongo = new Jongo(db);
-
     }
 
     public void setDbName(String dbName){
@@ -150,6 +131,14 @@ public class MongoCRUD {
 
         collection.remove("{ annotations.0 : { $exists: false } }");
     }
+    public void cleanTweet2Hashtag(){
+        if (!this.getCollectionName().equalsIgnoreCase("tweet2hashtag")){
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+        collection.remove("{ tweet: ''}");
+        collection.remove("{ hashtags.0 : { $exists: false } }");
+    }
 
     public void saveCluster(Label2Cluster l2c){
         if (!this.getCollectionName().matches("cluster[0-9]")){
@@ -185,12 +174,26 @@ public class MongoCRUD {
     }
 
     public void saveTweet2Hashtag(Tweet2Hashtag t2h){
-        if (!this.getCollectionName().equalsIgnoreCase("tweet2hashtag")){
+        if (!this.getCollectionName().equalsIgnoreCase("tweet2hashtag") && !this.getCollectionName().equalsIgnoreCase("tweetONtopic")){
             System.out.println("\n\nCollections sbagliata!");
             return;
         }
 
         collection.save(t2h);
+    }
+    public ArrayList<String> getTopHashtags(){
+        if (!this.getCollectionName().equalsIgnoreCase("hashtag2vec")){
+            System.out.println("\n\nCollections sbagliata!");
+            return null;
+        }
+
+        ArrayList<String> hashtags = new ArrayList<>();
+        MongoCursor<Word2Vec> h2v = collection.find().as(Word2Vec.class);
+
+        for (Word2Vec row: h2v){
+            hashtags.addAll(row.getWord2vec().keySet());
+        }
+        return hashtags;
     }
     public void saveTweet(String user, String text){
         if (!this.getCollectionName().equalsIgnoreCase("en")){
@@ -228,26 +231,53 @@ public class MongoCRUD {
 
     }
     public void convertTweetsInWords(ArrayList<Tweet2Hashtag> tweets, int sogliaMinima){
-        if (!this.getCollectionName().equalsIgnoreCase("word")) {
+        if (!this.getCollectionName().equalsIgnoreCase("wordsONtopic")) {
             System.out.println("\n\nCollections sbagliata!");
             return;
         }
+
         NLPExtractor nlpExtractor = new NLPExtractor();
-        TreeMap<String, Integer> word2vec = new TreeMap<>();
+        ArrayList<String> vocabulary = new ArrayList<>();
+        for (Tweet2Hashtag t: tweets) {
+            vocabulary.add(t.getTweet());
+        }
+
+        TreeMap<String, Double> word2vec = new TreeMap<>();
 
         for (Tweet2Hashtag t: tweets){
             String cleaned =  nlpExtractor.removeStopwords(t.getTweet());
             for (String s :cleaned.split("[^A-Za-z]")) {
                 if (nlpExtractor.isWord(s)) {
                     if (word2vec.get(s) == null)
-                        word2vec.put(s, 1);
-                    else
-                        word2vec.put(s, word2vec.get(s) + 1);
+                        word2vec.put(s, nlpExtractor.calculateBackgroundProbability(s,vocabulary));
                 }
             }
         }
 
         Word2Vec w2v = new Word2Vec(word2vec,sogliaMinima);
+        collection.save(w2v);
+    }
+    public void convertTweet2HashtagInHashtag(ArrayList<Tweet2Hashtag> tweets, int soglia){
+        if (!this.getCollectionName().equalsIgnoreCase("hashtag2vec")) {
+            System.out.println("\n\nCollections sbagliata!");
+            return;
+        }
+        NLPExtractor nlpExtractor = new NLPExtractor();
+        TreeMap<String, Double> hashtag2vec = new TreeMap<>();
+
+        for (Tweet2Hashtag t: tweets){
+            for (String hashtag: t.getHashtags()) {
+                String hasht = hashtag.replaceAll(" ","");
+                if (nlpExtractor.isWord(hasht)) {
+                    if (hashtag2vec.get(hasht) == null)
+                        hashtag2vec.put(hasht, 1d);
+                    else
+                        hashtag2vec.put(hasht, hashtag2vec.get(hasht) + 1);
+                }
+            }
+        }
+
+        Word2Vec w2v = new Word2Vec(hashtag2vec, soglia);
         collection.save(w2v);
     }
 

@@ -3,10 +3,10 @@ package model;
 import java.util.TreeMap;
 
 public class Word2Vec {
-    private TreeMap<String,Integer> word2vec;
+    private TreeMap<String,Double> word2vec;
 
     public Word2Vec(){ }
-    public Word2Vec(TreeMap<String,Integer> word2vec, int soglia){
+    public Word2Vec(TreeMap<String,Double> word2vec, int soglia){
         this.word2vec = new TreeMap<>();
         for (String key:word2vec.keySet()) {
             if (word2vec.get(key) >= soglia)
@@ -14,11 +14,11 @@ public class Word2Vec {
         }
     }
 
-    public TreeMap<String, Integer> getWord2vec() {
+    public TreeMap<String, Double> getWord2vec() {
         return word2vec;
     }
 
-    public void setWord2vec(TreeMap<String, Integer> word2vec) {
+    public void setWord2vec(TreeMap<String, Double> word2vec) {
         this.word2vec = word2vec;
     }
 }
