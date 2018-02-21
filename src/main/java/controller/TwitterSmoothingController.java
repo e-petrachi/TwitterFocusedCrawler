@@ -3,7 +3,6 @@ package controller;
 import api.nlp.NLPExtractor;
 import db.MongoCRUD;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-
 import java.util.HashMap;
 
 public class TwitterSmoothingController {
@@ -13,9 +12,9 @@ public class TwitterSmoothingController {
     private NLPExtractor nlp;
     private CircularFifoQueue<String> queue;
     private int dimensionWordsQueue;
-    private double sogliaPerplexity = 500;
+    private int sogliaPerplexity = 1000000;
     private double zeroProbability = 0.0000001;
-    private double maxPerplexity = 10000000;
+    private int maxPerplexity = 100000000;
 
     public TwitterSmoothingController() {
         MongoCRUD mongoCRUD = new MongoCRUD();
@@ -27,17 +26,19 @@ public class TwitterSmoothingController {
         this.dimensionWordsQueue = 0;
     }
     public boolean check(String tweet){
-        String tweet_cleaned = this.nlp.removeStopwords(tweet);
-        double perp = this.getPerplexityForeground(tweet_cleaned);
+        String tweet_m = this.nlp.removeUsersAndLink(tweet);
+        String tweet_cleaned = this.nlp.removeStopwords(tweet_m);
+        int perp = this.getPerplexityForeground(tweet_cleaned);
 
         if (perp > this.sogliaPerplexity) {
             return false;
         }
-        System.out.print("*");
+        System.out.println(tweet_cleaned + " ---> " + perp);
         return true;
     }
     public void saveHistory(String tweet){
-        String tweet_cleaned = this.nlp.removeStopwords(tweet);
+        String tweet_m = this.nlp.removeUsersAndLink(tweet);
+        String tweet_cleaned = this.nlp.removeStopwords(tweet_m);
         this.queue.add(tweet_cleaned);
         this.dimensionWordsQueue = this.countTotalWords();
     }
@@ -47,7 +48,8 @@ public class TwitterSmoothingController {
 
         int counter = 0;
         for (String tweet : queue) {
-            if (tweet.toLowerCase().contains(word.toLowerCase())){
+            // TODO contains ?!
+            if (tweet.contains(word)){
                 counter++;
             }
         }
@@ -75,20 +77,26 @@ public class TwitterSmoothingController {
             return zeroProbability;
         }
     }
-    public double getPerplexityForeground(String tweet){
+    public int getPerplexityForeground(String tweet){
         String[] words = tweet.split("[^A-Za-z]");
 
-        if (words.length < 5)
+        if (words.length < 6)
             return this.maxPerplexity;
 
         double sommatoria = 0d;
+        int size = 0;
         for (String word: words) {
-            //System.out.println(word);
             if (word.length() > 2) {
+                //System.out.println(word);
                 sommatoria += (Math.log(this.getProbabilityForeground(word)) / Math.log(2));
+                size++;
             }
         }
-        sommatoria /= words.length;
-        return Math.pow(2,sommatoria*(-1));
+
+        if (size == 0)
+            return this.maxPerplexity;
+
+        sommatoria /= size*(-1);
+        return (int) Math.pow(2,sommatoria);
     }
 }

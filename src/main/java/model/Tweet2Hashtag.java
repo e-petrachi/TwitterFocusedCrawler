@@ -5,7 +5,6 @@ import java.util.ArrayList;
 public class Tweet2Hashtag {
     private String tweet;
     private ArrayList<String> hashtags;
-    // TODO insert the perplexity and resave in db
 
     public Tweet2Hashtag(){
         this.hashtags = new ArrayList<>();

@@ -10,6 +10,7 @@ public class NLPTests {
     private NLPExtractor tester;
     private String word;
     private ArrayList<String> vocabulary;
+    private String tweet;
 
     @Before
     public void instances(){
@@ -19,6 +20,7 @@ public class NLPTests {
         vocabulary.add("parola1");
         vocabulary.add("parola2");
         vocabulary.add("parola3");
+        tweet = "bellaparola @utente #hashtag   uèw+p3r4g   p-wàg,,, èwòobwbè+httpnvwe8923 b$g2p3o£g";
     }
     @Test
     public void probabilityExisting() {
@@ -29,6 +31,13 @@ public class NLPTests {
     public void probabilityNotExisting() {
         double result = tester.calculateBackgroundProbability("no",vocabulary);
         assertTrue(result == 0);
+    }
+    @Test
+    public void removeSpaceForRemovingStopwords(){
+        String s = tester.removeUsersAndLink(tweet);
+        String t = tester.removeStopwords(s);
+        System.out.println("|" + t + "|");
+        assertTrue(t.contains("bellaparola") && t.contains("hashtag") && t.contains(" "));
     }
 }
 

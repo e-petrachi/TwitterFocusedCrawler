@@ -1,7 +1,4 @@
 import api.twitter.TweetExtractor;
-import controller.TwitterSmoothingController;
-
-import java.util.Date;
 
 public class TweetSmoothingStreams {
     public static void main(String[] args) throws Exception {

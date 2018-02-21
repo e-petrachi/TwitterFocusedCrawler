@@ -146,4 +146,19 @@ public class NLPExtractor {
         NGramUtils nGramUtils = new NGramUtils();
         return nGramUtils.calculateUnigramMLProbability(word, stringListArrayList);
     }
+
+    public String removeUsersAndLink(String tweet){
+        String result = "";
+
+        String[] arg = tweet.split(" ");
+        for (String s : arg){
+            if (!s.contains("@") && this.isWord(s)) {
+                if (s.length() > 3) {
+                    result += s + " ";
+                }
+            }
+        }
+
+        return result;
+    }
 }

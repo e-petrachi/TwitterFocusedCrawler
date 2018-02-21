@@ -242,8 +242,6 @@ public class MongoCRUD {
         TreeMap<String, Double> word2occ = new TreeMap<>();
 
         for (Tweet2Hashtag t: tweets){
-            //TODO inutile ?!
-            //String cleaned =  nlpExtractor.removeStopwords(t.getTweet());
             for (String s : t.getTweet().split("[^A-Za-z]")) {
                 if (nlpExtractor.isWord(s)) {
                     if (!word2occ.containsKey(s))
