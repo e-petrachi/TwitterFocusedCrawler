@@ -98,7 +98,7 @@ public class Main {
         System.out.println("\n------------------------\tSTART LEARNING TWEET\t------------------------\n");
 
         TweetElaborator tweetElaborator = new TweetElaborator();
-        ArrayList<String> topics;
+        ArrayList<String> topics = null;
 
         if (false) {
             ClassifierController classifier = new ClassifierController(cluster3);

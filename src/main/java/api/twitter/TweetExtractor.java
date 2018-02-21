@@ -141,9 +141,8 @@ public class TweetExtractor {
         StatusListener listener = new StatusListener() {
             @Override
             public void onStatus(Status status) {
-                System.out.print(".");
                 if (tsc.check(status.getText())) {
-                    //mongoCRUD.saveTweet("@" + status.getUser().getScreenName(), status.getText());
+                    mongoCRUD.saveTweet("@" + status.getUser().getScreenName(), status.getText());
                     tsc.saveHistory(status.getText());
                 }
 

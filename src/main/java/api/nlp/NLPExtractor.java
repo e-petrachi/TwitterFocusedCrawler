@@ -51,8 +51,7 @@ public class NLPExtractor {
             }
         }
 
-        return result.substring(0,result.length()-1);
-
+        return result;
     }
     public String stemming(String textStopped){
         String result = "";

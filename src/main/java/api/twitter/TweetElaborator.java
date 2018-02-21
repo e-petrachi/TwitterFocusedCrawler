@@ -54,9 +54,12 @@ public class TweetElaborator {
         mongoCRUD.clearCollection();
 
         for (Tweet2Hashtag tweet2Hashtag: tweets) {
+            boolean inserito = false;
             for (String hashtag : tweet2Hashtag.getHashtags()) {
-                if (this.compareTopicToHashtag(hashtag,topic))
+                if (this.compareTopicToHashtag(hashtag,topic) && !inserito) {
                     mongoCRUD.saveTweet2Hashtag(tweet2Hashtag);
+                    inserito = true;
+                }
             }
         }
     }

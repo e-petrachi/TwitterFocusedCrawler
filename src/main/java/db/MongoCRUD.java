@@ -13,6 +13,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 
@@ -238,29 +239,31 @@ public class MongoCRUD {
 
         NLPExtractor nlpExtractor = new NLPExtractor();
 
-        TreeMap<String, Double> word2vec = new TreeMap<>();
+        TreeMap<String, Double> word2occ = new TreeMap<>();
 
         for (Tweet2Hashtag t: tweets){
-            String cleaned =  nlpExtractor.removeStopwords(t.getTweet());
-            for (String s :cleaned.split("[^A-Za-z]")) {
+            //TODO inutile ?!
+            //String cleaned =  nlpExtractor.removeStopwords(t.getTweet());
+            for (String s : t.getTweet().split("[^A-Za-z]")) {
                 if (nlpExtractor.isWord(s)) {
-                    if (word2vec.get(s) == null)
-                        word2vec.put(s, 1d);
+                    if (!word2occ.containsKey(s))
+                        word2occ.put(s, 1d);
                     else
-                        word2vec.put(s, word2vec.get(s) + 1);
+                        word2occ.put(s, word2occ.get(s) + 1d);
                 }
             }
         }
 
-        Word2Vec w2v = new Word2Vec(word2vec,sogliaMinima);
+        Word2Vec w2v = new Word2Vec(word2occ, sogliaMinima);
 
         ArrayList<String> vocabulary = new ArrayList<>();
         for (Tweet2Hashtag t: tweets) {
             String tweet = t.getTweet();
 
             for (String s: tweet.split("[^A-Za-z]")) {
-                if (w2v.getWord2vec().containsKey(s.replaceAll(" ","")))
-                    vocabulary.add(s);
+                String clean = s.replaceAll(" ","");
+                if (nlpExtractor.isWord(clean) && w2v.getWord2vec().containsKey(clean))
+                    vocabulary.add(clean);
             }
         }
 
@@ -270,7 +273,7 @@ public class MongoCRUD {
             word2w.put(s,pbw);
         }
 
-        Word2Vec w2w = new Word2Vec(word2vec,0);
+        Word2Vec w2w = new Word2Vec(word2w,0);
         collection.save(w2w);
     }
     public void convertTweet2HashtagInHashtag(ArrayList<Tweet2Hashtag> tweets, int soglia){
@@ -323,7 +326,7 @@ public class MongoCRUD {
         return  tweetArrayList;
     }
 
-    public Word2Vec getBackgroundModel(){
+    public HashMap<String, Double> getBackgroundModel(){
         if (!this.getCollectionName().equalsIgnoreCase("wordsONtopic")){
             System.out.println("\n\nCollections sbagliata!");
             return null;
@@ -331,9 +334,12 @@ public class MongoCRUD {
 
         MongoCursor<Word2Vec> h2v = collection.find().as(Word2Vec.class);
 
+        Word2Vec w2v = null;
         for (Word2Vec row: h2v){
-            return row;
+            w2v = row;
         }
-        return null;
+
+        HashMap<String,Double> word2prob = new HashMap<>(w2v.getWord2vec());
+        return word2prob;
     }
 }
