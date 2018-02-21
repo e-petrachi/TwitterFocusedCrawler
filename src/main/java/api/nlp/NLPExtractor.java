@@ -40,6 +40,8 @@ public class NLPExtractor {
             return false;
         if (s.contains("live"))
             return false;
+        if (s.contains("free"))
+            return false;
         return true;
     }
     public String removeStopwords(String text){
