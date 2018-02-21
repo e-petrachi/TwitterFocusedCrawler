@@ -12,7 +12,7 @@ public class TwitterSmoothingController {
     private NLPExtractor nlp;
     private CircularFifoQueue<String> queue;
     private int dimensionWordsQueue;
-    private int sogliaPerplexity = 1000000;
+    private int sogliaPerplexity = 500000;
     private double zeroProbability = 0.0000001;
     private int maxPerplexity = 100000000;
 

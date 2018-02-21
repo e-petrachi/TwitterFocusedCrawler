@@ -243,11 +243,19 @@ public class MongoCRUD {
 
         for (Tweet2Hashtag t: tweets){
             for (String s : t.getTweet().split("[^A-Za-z]")) {
-                if (nlpExtractor.isWord(s)) {
+                if (nlpExtractor.isWord(s) && nlpExtractor.isNotExplicit(s)) {
                     if (!word2occ.containsKey(s))
                         word2occ.put(s, 1d);
                     else
                         word2occ.put(s, word2occ.get(s) + 1d);
+                }
+            }
+            for (String h : t.getHashtags()){
+                if (nlpExtractor.isWord(h) && nlpExtractor.isNotExplicit(h)) {
+                    if (!word2occ.containsKey(h))
+                        word2occ.put(h, 1d);
+                    else
+                        word2occ.put(h, word2occ.get(h) + 1d);
                 }
             }
         }
@@ -263,6 +271,15 @@ public class MongoCRUD {
                 if (nlpExtractor.isWord(clean) && w2v.getWord2vec().containsKey(clean))
                     vocabulary.add(clean);
             }
+
+            ArrayList<String> hashtag = t.getHashtags();
+
+            for (String h: hashtag) {
+                String clean = h.replaceAll(" ","");
+                if (nlpExtractor.isWord(clean) && w2v.getWord2vec().containsKey(clean))
+                    vocabulary.add(clean);
+            }
+
         }
 
         TreeMap<String, Double> word2w = new TreeMap<>();
