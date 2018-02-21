@@ -11,4 +11,4 @@ out
 gradlew
 gradlew.bat
 .env
-twitter4j.properties
+*.properties
