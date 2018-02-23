@@ -46,9 +46,9 @@ public class Main {
             newsController.newsExtractionAndSave();
         if (false)
             newsController.newsCleaning();
-        if (false)
+        if (true)
             clusteringOneController.createMatrix();
-        if (false)
+        if (true)
             fileController.saveCluster(1);
 
         // TODO execute
@@ -124,7 +124,7 @@ public class Main {
             tweetElaborator.createBackgroundForTopic(common);
             System.out.println("\n\tBACKGROUND CREATO su " + common);
         }
-        if (true){
+        if (false){
             tweetElaborator.createWord2weight(sogliaMinimaWords);
         }
 

@@ -126,7 +126,7 @@ public class ClusteringTwoController implements ClusteringController {
             System.out.println("### FILE ARFF non valido!");
         }
 
-        int num = 50;
+        int num = 5;
         SimpleKMeans model;
         ArrayList<Double> stats;
 

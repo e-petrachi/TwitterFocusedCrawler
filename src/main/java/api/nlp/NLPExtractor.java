@@ -32,16 +32,11 @@ public class NLPExtractor {
         return true;
     }
     public boolean isNotExplicit(String s){
-        if (s.contains("video"))
-            return false;
-        if (s.contains("hottest"))
-            return false;
-        if (s.contains("link"))
-            return false;
-        if (s.contains("live"))
-            return false;
-        if (s.contains("free"))
-            return false;
+        String[] x = new String[]{"video","hot","link","live","free","sex","xxx"};
+        for (String xxx:x) {
+            if (s.contains(xxx))
+                return false;
+        }
         return true;
     }
     public String removeStopwords(String text){
