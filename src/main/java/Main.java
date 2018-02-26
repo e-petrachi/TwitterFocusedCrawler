@@ -39,6 +39,10 @@ public class Main {
 
         Cluster cluster2_matrix = null;
 
+        /*
+        * CLUSTERING 1
+        */
+
         if (false)
             newsController.newsExtractionAndSave();
         if (false)

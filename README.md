@@ -45,9 +45,28 @@ previa registrazione gratuita sul <a href="https://developer.twitter.com">sito</
 previa autenticazione e via OAUTH dalla classe sopra (vedi file .env generato).
 
 
-#### ALGORITMI IMPLEMENTATI
+### ALGORITMI IMPLEMENTATI
 
+1) CLUSTERING ONE - 
+ottenuto dal testo delle news filtrando le stopwords ed eseguendo stemming del testo per poi utilizzare il TF-IDF per clusterizzare
 
+##### ESECUZIONE CLUSTERING ONE:
 
-#### CONSIDERAZIONI FINALI
+a) [newsController.newsExtractionAndSave()](src/main/java/Main.java:47) : crea e popola il database di news, estraendo il contenuto delle news ed effettuando stopwords e stemming; 
+b) [newsController.newsCleaning()]()Calcolare i tf-idf delle parole estratte
+Creare il file arff per il training (x completezza viene creato anche il file csv)
+Eseguire il clustering 
+
+2_Clustering basato sulla probabilità dei link delle annotazioni di TagMe
+*Creare e popolare il db (solo se non è stato già fatto sopra)
+*Estrarre il contenuto delle news( stopwords ) (solo se non è stato già fatto sopra)
+Estrarre le annotazioni dal testo con TagMe
+Creare il file arff per il training (x completezza viene creato anche il file csv)
+Eseguire il clustering 
+
+3_Clustering del clustering di supporto con il grado di relatività tra annotazioni di TagMe
+
+#### ESECUZIONE del COSDICE
+
+#### CONSIDERAZIONI FINALI e SVILUPPI
 
