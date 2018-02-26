@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 public class Main {
 
-    // ritrova circa 15 annotazioni per news
     private static double sogliaMinimaLink = 0.2;
 
     // settare a 0 se si vogliono salvare tutte le features

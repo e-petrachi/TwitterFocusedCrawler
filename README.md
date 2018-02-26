@@ -1,9 +1,12 @@
-# TWITTER FOCUSED CRAWLER
+# TWITTER FOCUSED CRAWLER 
+
+#### <a href="https://github.com/e-petrachi">Enrico Petrachi</a> + Bernardo Marino
+
 
 Ricerca autonoma di informazioni (**focused** e  **intelligent crawler**): 
 valutare tecniche di _crawling intelligente_ sul social network **TWITTER** per trovare informazioni rilevanti impiegando non solo le search API.
 
-· Un tool per cercare **TWEET** su un determinato **TOPIC** 
+Un tool per cercare **TWEET** su un determinato **TOPIC** 
 utilizzando tecniche di **clustering** e **crawling intelligente**.
 
 
@@ -11,25 +14,18 @@ utilizzando tecniche di **clustering** e **crawling intelligente**.
 
 * <a href="https://newsapi.org/docs">NewsAPI</a>:
 libreria REST per cercare e recuperare articoli (news) da tutto il web e popolare il database delle news;
-
 * <a href="http://unirest.io/java">Unirest4j</a>: 
 comoda libreria per fare richieste HTTP;
-
 * <a href="https://github.com/kohlschutter/boilerpipe">BoilerPIPE</a>: 
 libreria Google per estrarre testo dalle pagine HTML;
-
 * <a href="https://github.com/enrichman/tagme4j">TAGme4j</a>: 
 TagMe API client per applicazioni Java;
-
 * <a href="https://mongodb.github.io/mongo-java-driver/">MONGOdb</a>: 
 database noSQL per la memorizzazione semplice dei dati persistenti;
-
 * <a href="https://github.com/bguerout/jongo">Jongo</a>: 
 libreria per fare il cast al volo dei dati estratti da mongoDB nelle relative classi;
-
 * <a href="http://weka.sourceforge.net/doc.stable/">WEKA</a>:
  libreria per eseguire gli algoritmi di apprendimento automatico e di data mining;
-
 * <a href="http://twitter4j.org/en/index.html">TWITTER4j</a>:
 libreria per interfacciarsi con le API e lo stream di twitter.
 
@@ -46,9 +42,13 @@ previa autenticazione e via OAUTH dalla classe sopra (vedi file .env generato).
 
 #### ESECUZIONE del CODICE
 
+N.B. Ogni passo della classe Main è autocontenuto ed apparte alcune dipendenze dei parametri dei metodi, 
+ogni passo può essere eseguito in maniera totalmente indipendente dagli altri in quanto memorizza/preleva dati direttamente dal database.
+
 E' necessario creare preliminarmente i seguenti database Mongo con le seguenti collezioni:
 
-
+* **tfc** -> news, news2annotations, label1, label2, label3, cluster0, cluster1, cluster2, cluster3;
+* **twitterDB** -> en, smooth, tweet2hashtag, hashtag2vec, tweetONtopic, wordsONtopic.
 
 ### ALGORITMI IMPLEMENTATI
 
@@ -86,10 +86,10 @@ clustering del clustering di supporto (clustering 0) creato con il grado di rela
 > * [`fileController.saveCluster(3)`](src/main/java/Main.java): crea il file arff per il training del clustering finale;
 > * [`cluster3 = clusteringThreeController.executeCluster()`](src/main/java/Main.java): esegue il clustering finale.
 
-4) <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.221.9092&rep=rep1&type=pdf">SMOOTING STREAMS con Normalized Stupid Backoff</a> - 
+4) <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.221.9092&rep=rep1&type=pdf">SMOOTHING STREAMS con Normalized Stupid Backoff</a> - 
 focused crawler ottimizzato su un determinato lessico attuale (background) e addestrato su un determinato topic in continuo aggiornamento (coda runtime) che verrà selezionato in automatico tra i top topics dell'ultimo clustering e i topic ottenuti facendo uno stream di tutti i tweets di twitter per qualche giorno/settimana 
 
-> ##### ESECUZIONE SMOOTING STREAMS:
+> ##### ESECUZIONE SMOOTHING STREAMS:
 > * [`TweetPopulate`](src/main/java/TweetPopulate.java) : popola il background di twitter (lasciarlo in esecuzione per qualche giorno..);
 
 > * [`topics = classifier.getTopics()`](src/main/java/Main.java) : estrae i top topic dal clustering three;
@@ -101,5 +101,16 @@ focused crawler ottimizzato su un determinato lessico attuale (background) e add
 
 > * [`TweetSmoothingStreams`](src/main/java/TweetSmoothingStreams.java) : apre lo stream di twitter ed esegue il focused crawler in real time memorizzando solo i tweet pertinenti.
 
-#### CONSIDERAZIONI FINALI e SVILUPPI
+#### SVILUPPI
 
+Per quanto riguarda i clustering è evidente che sarebbe necessaria una maggiore ricchezza di news su cui basare i diversi clustering,
+che magari potrebbero scaturire da altre APIs (da testare) che magari renderebbero più ricca la base da cui far partire i clustering.
+
+Per quanto riguarda lo smoothing stream invece sarebbe interessante creare un background di tweet molto più corposo, 
+magari accumulando tweet per un intero mese e andarlo a integrare tenendo conto anche del CLUSTERING ONE come corpus linguistico; 
+si vede infatti una notevole presenza di parole rumorose come FOLLOW o CLICK e altre, che dovrebbero essere rimosse in quanto non costituiscono
+contenuto informativo riguardante un topic in particolare. 
+
+Risulta poi difficile il settaggio della soglia di perplessità dello Smoothing Stream 
+in quanto dipende fortemente dal numero di parole del tweet, quindi magari sarebbe interessante trovare un modo per settarlo in automatico,
+oppure modificare tale misura per renderla indipendente dal numero di parole del tweet.
