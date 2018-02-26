@@ -16,9 +16,6 @@ public class Main {
     private static int sogliaCluster2 = 6;
     private static int sogliaCluster3 = 1;
 
-    // settare il num di cluster
-    private static int[] numCluster = {38,0,0,4};
-
     // settare a 0 se si vogliono salvare tutte le parole
     private static int sogliaMinimaWords = 10;
 
@@ -46,9 +43,9 @@ public class Main {
             newsController.newsExtractionAndSave();
         if (false)
             newsController.newsCleaning();
-        if (true)
+        if (false)
             clusteringOneController.createMatrix();
-        if (true)
+        if (false)
             fileController.saveCluster(1);
 
         // TODO execute
@@ -130,21 +127,5 @@ public class Main {
 
 
         System.out.println("\n------------------------\tEND LEARNING TWEET\t------------------------\n");
-        /*
-
-        TweetExtractor tweetExtractor = new TweetExtractor();
-        tweetExtractor.auth();
-        List<String> tweets1 = tweetExtractor.searchTweet("usa");
-        System.out.println("\n\nTWEET WITH URL: ");
-        for (String t : tweets1){
-            System.out.println(t);
-        }
-
-        List<String> tweets2 = tweetExtractor.searchTweet("trump");
-        System.out.println("\n\nTWEET WITH URL: ");
-        for (String t : tweets2){
-            System.out.println(t);
-        }
-        */
     }
 }

@@ -48,7 +48,6 @@ public class TwitterSmoothingController {
 
         int counter = 0;
         for (String tweet : queue) {
-            // TODO contains ?!
             if (tweet.contains(word)){
                 counter++;
             }

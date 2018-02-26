@@ -130,7 +130,6 @@ public class ClusteringOneController implements ClusteringController {
 
         int num = 2;
         SimpleKMeans model;
-        ArrayList<Double> stats;
 
         do {
             model = new SimpleKMeans();
@@ -152,7 +151,8 @@ public class ClusteringOneController implements ClusteringController {
             this.getStatsClusters(model,data);
 
             num = num+1;
-        } while (num<100);
+
+        } while (model.getSquaredError() < 100);
 
         return model;
 

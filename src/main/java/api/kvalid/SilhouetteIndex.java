@@ -1,7 +1,5 @@
-
 package api.kvalid;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -22,10 +20,9 @@ public class SilhouetteIndex {
 	/** Global SI. */
 	protected double m_globalSilhouette;
 
-	/** Default constructor. */
 	public SilhouetteIndex() {
         this.cluster2elements = new HashMap<>();
-		m_clustersSilhouette = new ArrayList<Double>();
+		m_clustersSilhouette = new ArrayList<>();
 		m_globalSilhouette = 0.0;
 	}
 
@@ -33,7 +30,7 @@ public class SilhouetteIndex {
 		Instances instances, DistanceFunction distanceFunction) throws Exception {
 
 		if (clusterer == null || instances == null)
-			throw new Exception("SilhouetteIndex: the clusterer or instances are null!");
+			throw new Exception("SilhouetteIndex: the cluster or instances are null!");
 
 		if (clusterer instanceof SimpleKMeans)
 		    this.setDimension((SimpleKMeans) clusterer);
@@ -190,7 +187,7 @@ public class SilhouetteIndex {
 		else if (si >  0.25 && si <= 0.50)
 			eval = "weak structure!";
 		else if (si <= 0.25)
-			eval = "non substancial structure!";
+			eval = "not substantial structure!";
 
 		return eval;
 	}
@@ -206,11 +203,11 @@ public class SilhouetteIndex {
 		for (int i = 0; i < m_clustersSilhouette.size(); i++) {
 			double si = m_clustersSilhouette.get(i);
 			description.append("   Cluster " + (i+1) + ": " + String.format(Locale.US, "%.4f", si)
-				+ ", size: "+ elements[i] + ", veredict: " + evalSilhouette(si) + "\n");
+				+ ", size: "+ elements[i] + ", verdict: " + evalSilhouette(si) + "\n");
 		}
 
 		description.append("   Mean: " + String.format(Locale.US, "%.4f", m_globalSilhouette)
-			+ ", veredict: " + evalSilhouette(m_globalSilhouette));
+			+ ", verdict: " + evalSilhouette(m_globalSilhouette));
 
 		return description.toString();
 	 }

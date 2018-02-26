@@ -1,10 +1,7 @@
 package api.nlp;
 
-import model.Articles;
 import model.News;
-import org.jongo.MongoCursor;
 import weka.core.Stopwords;
-import weka.filters.unsupervised.attribute.StringToWordVector;
 
 import org.tartarus.snowball.SnowballStemmer;
 import org.tartarus.snowball.ext.porterStemmer;

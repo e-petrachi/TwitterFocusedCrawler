@@ -8,8 +8,6 @@ import model.Articles;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Date;
-
 public class NewsExtractor {
 
     // TODO cambia le apikey

@@ -1,15 +1,9 @@
 package controller;
 
-import api.kvalid.SilhouetteIndex;
-import weka.clusterers.AbstractClusterer;
 import weka.clusterers.SimpleKMeans;
-import weka.core.Attribute;
-import weka.core.DistanceFunction;
 import weka.core.Instance;
 import weka.core.Instances;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ClassifierController {
     private SimpleKMeans model;

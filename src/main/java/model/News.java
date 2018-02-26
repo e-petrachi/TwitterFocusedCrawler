@@ -1,9 +1,6 @@
 package model;
 
-import org.jongo.marshall.jackson.oid.Id;
-import org.jongo.marshall.jackson.oid.MongoId;
 import org.json.JSONObject;
-import java.util.Date;
 
 public class News {
     private String title;

@@ -20,7 +20,6 @@ import java.util.List;
 public class ClusteringThreeController implements ClusteringController {
 
     private int sogliaCluster = 0;
-    private int numClusters = 10;
 
     public ClusteringThreeController(int sogliaCluster) {
         this.sogliaCluster = sogliaCluster;
@@ -42,9 +41,8 @@ public class ClusteringThreeController implements ClusteringController {
             System.out.println("### FILE ARFF non valido!");
         }
 
-        int num = 38;
+        int num = 2;
         SimpleKMeans model;
-        ArrayList<Double> stats;
 
         do {
             model = new SimpleKMeans();
@@ -68,7 +66,7 @@ public class ClusteringThreeController implements ClusteringController {
 
             num = num+1;
 
-        } while (num==39);
+        } while (model.getSquaredError() < 100);
 
         return model;
     }
@@ -90,10 +88,8 @@ public class ClusteringThreeController implements ClusteringController {
             System.out.println("### FILE ARFF non valido!");
         }
 
-        //int num = this.numClusters;
-        int num = 1;
+        int num = 2;
         SimpleKMeans model;
-        ArrayList<Double> stats;
 
         do {
             model = new SimpleKMeans();
@@ -117,8 +113,7 @@ public class ClusteringThreeController implements ClusteringController {
 
             num = num + 1;
 
-        //} while (num <= this.numClusters);
-        } while (num <= 100);
+        } while (model.getSquaredError() < 100);
 
         return model;
     }

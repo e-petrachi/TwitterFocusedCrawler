@@ -1,8 +1,6 @@
 package model;
 
 import api.tagme4j.model.Annotation;
-import org.jongo.marshall.jackson.oid.MongoId;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,7 +1,6 @@
 package model;
 
 import api.tagme4j.model.Annotation;
-
 import java.util.ArrayList;
 import java.util.TreeMap;
 
