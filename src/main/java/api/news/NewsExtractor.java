@@ -11,7 +11,7 @@ import org.json.JSONObject;
 public class NewsExtractor {
 
     // TODO cambia le apikey
-    private static String newsAPI = "d24aaf7ff6304c408443b2aaae218c9e";
+    private static String newsAPI = "";
 
     private String language = "en";
     private int pageSize = 100;

@@ -1,7 +1,5 @@
 # TWITTER FOCUSED CRAWLER 
 
-#### <a href="https://github.com/e-petrachi">Enrico Petrachi</a> + Bernardo Marino
-
 
 Ricerca autonoma di informazioni (**focused** e  **intelligent crawler**): 
 valutare tecniche di _crawling intelligente_ sul social network **TWITTER** per trovare informazioni rilevanti impiegando non solo le search API.

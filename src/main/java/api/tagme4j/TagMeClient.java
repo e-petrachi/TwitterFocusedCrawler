@@ -15,7 +15,7 @@ public class TagMeClient {
     private final static String host   = "tagme.d4science.org";
 
     // TODO cambia le apikey
-    private String apikey = "147bbd8a-9831-4544-8017-7dc60ad94031";
+    private String apikey = "";
 
     private OkHttpClient client;
     private Gson gson;

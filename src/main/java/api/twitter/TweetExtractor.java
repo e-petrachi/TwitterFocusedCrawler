@@ -16,8 +16,8 @@ import java.util.List;
 public class TweetExtractor {
 
     // TODO cambia le apikey
-    private String apikey = "y2Q54l9L1b7Wo4guIlGsFsaoh";
-    private String apiSecret = "jEvklEu9Oukw2p2Ea8kNuTaqOLQvM1KKogkjxM70G6FkCtkyD2";
+    private String apikey = "";
+    private String apiSecret = "";
 
     private AccessToken accessToken;
     private Twitter twitter;
