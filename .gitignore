@@ -11,4 +11,3 @@ out
 gradlew
 gradlew.bat
 .env
-*.properties
