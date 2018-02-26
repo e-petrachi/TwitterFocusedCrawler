@@ -52,8 +52,10 @@ ottenuto dal testo delle news filtrando le stopwords ed eseguendo stemming del t
 
 ##### ESECUZIONE CLUSTERING ONE:
 
-a) [newsController.newsExtractionAndSave()](src/main/java/Main.java:47) : crea e popola il database di news, estraendo il contenuto delle news ed effettuando stopwords e stemming; 
-b) [newsController.newsCleaning()]()Calcolare i tf-idf delle parole estratte
+a) [newsController.newsExtractionAndSave()](src/main/java/Main.java) : crea e popola il database di news, estraendo il contenuto delle news ed effettuando stopwords e stemming; 
+
+b) [newsController.newsCleaning()](src/main/java/Main.java): Calcola i tf-idf delle parole estratte
+
 Creare il file arff per il training (x completezza viene creato anche il file csv)
 Eseguire il clustering 
 
