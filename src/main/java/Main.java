@@ -101,18 +101,13 @@ public class Main {
         TweetElaborator tweetElaborator = new TweetElaborator();
         ArrayList<String> topics = null;
 
+        /*
+        * SMOOTHING STREAMS
+        */
+
         if (false) {
             ClassifierController classifier = new ClassifierController(cluster3);
-
             topics = classifier.getTopics();
-
-            int i = 1;
-            for (String topic : topics) {
-                System.out.print("" + i + "|" + topic + " ");
-                if (i % 5 == 0)
-                    System.out.println();
-                i++;
-            }
         }
         if (false){
             tweetElaborator.elaborateBackground();

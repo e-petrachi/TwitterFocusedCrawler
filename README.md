@@ -44,31 +44,62 @@ previa registrazione gratuita sul <a href="https://developer.twitter.com">sito</
 * [Twitter4j: properties](twitter4j.properties) 
 previa autenticazione e via OAUTH dalla classe sopra (vedi file .env generato).
 
+#### ESECUZIONE del CODICE
+
+E' necessario creare preliminarmente i seguenti database Mongo con le seguenti collezioni:
+
+
 
 ### ALGORITMI IMPLEMENTATI
 
 1) CLUSTERING ONE - 
 ottenuto dal testo delle news filtrando le stopwords ed eseguendo stemming del testo per poi utilizzare il TF-IDF per clusterizzare
 
-##### ESECUZIONE CLUSTERING ONE:
+> ##### ESECUZIONE CLUSTERING ONE:
+> * [`newsController.newsExtractionAndSave()`](src/main/java/Main.java) : crea e popola il database di news, estraendo il contenuto delle news ed effettuando stopwords e stemming;
+> * [`newsController.newsCleaning()`](src/main/java/Main.java) : ripulisce il db da eventuali news senza testo;
+> * [`clusteringOneController.createMatrix()`](src/main/java/Main.java): calcola i tf-idf delle parole estratte e crea la matrice per eseguire il clustering;
+> * [`fileController.saveCluster(1)`](src/main/java/Main.java): crea il file arff per il training;
+> * [`cluster1 = clusteringOneController.executeCluster()`](src/main/java/Main.java): esegue il clustering.
 
-a) [newsController.newsExtractionAndSave()](src/main/java/Main.java) : crea e popola il database di news, estraendo il contenuto delle news ed effettuando stopwords e stemming; 
 
-b) [newsController.newsCleaning()](src/main/java/Main.java): Calcola i tf-idf delle parole estratte
 
-Creare il file arff per il training (x completezza viene creato anche il file csv)
-Eseguire il clustering 
+2) CLUSTERING TWO - 
+ottenuto dal testo delle news e basato sulla probabilità dei link delle annotazioni di TagMe
 
-2_Clustering basato sulla probabilità dei link delle annotazioni di TagMe
-*Creare e popolare il db (solo se non è stato già fatto sopra)
-*Estrarre il contenuto delle news( stopwords ) (solo se non è stato già fatto sopra)
-Estrarre le annotazioni dal testo con TagMe
-Creare il file arff per il training (x completezza viene creato anche il file csv)
-Eseguire il clustering 
+> ##### ESECUZIONE CLUSTERING TWO:
+> * [`newsController.annotationsExtractionAndSave(sogliaMinimaLink)`](src/main/java/Main.java) : estrae le annotazioni dal testo delle news con TAGME4j
+> * [`newsController.news2AnnCleaning()`](src/main/java/Main.java) : ripulisce il db da eventuali news senza annotazioni;
+> * [`cluster2_matrix = clusteringTwoController.createMatrix()`](src/main/java/Main.java): salva le probabilità dei link di TAGME sopra una certa soglia e crea la matrice per eseguire il clustering;
+> * [`fileController.saveCluster(2)`](src/main/java/Main.java): crea il file arff per il training;
+> * [`cluster2 = clusteringTwoController.executeCluster()`](src/main/java/Main.java): esegue il clustering.
 
-3_Clustering del clustering di supporto con il grado di relatività tra annotazioni di TagMe
 
-#### ESECUZIONE del COSDICE
+3) CLUSTERING THREE - 
+clustering del clustering di supporto (clustering 0) creato con il grado di relatività tra annotazioni di TagMe e basato sulla media delle probabilità dei link delle annotazioni di TagMe all'interno dei cluster
+
+> ##### ESECUZIONE CLUSTERING THREE:
+> * [`clusteringThreeController.createMatrix0()`](src/main/java/Main.java) : crea la matrice per addestrare il clustering di supporto con il grado di relatività tra annotazioni TAGME;
+> * [`fileController.saveCluster(0)`](src/main/java/Main.java): crea il file arff per il training del clustering di supporto;
+> * [`cluster0 = clusteringThreeController.executeCluster0()`](src/main/java/Main.java): esegue il clustering di supporto;
+> * [`clusteringThreeController.createMatrix(cluster0, cluster2_matrix)`](src/main/java/Main.java) : crea la matrice per addestrare il clustering finale;
+> * [`fileController.saveCluster(3)`](src/main/java/Main.java): crea il file arff per il training del clustering finale;
+> * [`cluster3 = clusteringThreeController.executeCluster()`](src/main/java/Main.java): esegue il clustering finale.
+
+4) <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.221.9092&rep=rep1&type=pdf">SMOOTING STREAMS con Normalized Stupid Backoff</a> - 
+focused crawler ottimizzato su un determinato lessico attuale (background) e addestrato su un determinato topic in continuo aggiornamento (coda runtime) che verrà selezionato in automatico tra i top topics dell'ultimo clustering e i topic ottenuti facendo uno stream di tutti i tweets di twitter per qualche giorno/settimana 
+
+> ##### ESECUZIONE SMOOTING STREAMS:
+> * [`TweetPopulate`](src/main/java/TweetPopulate.java) : popola il background di twitter (lasciarlo in esecuzione per qualche giorno..);
+
+> * [`topics = classifier.getTopics()`](src/main/java/Main.java) : estrae i top topic dal clustering three;
+> * [`tweetElaborator.elaborateBackground()`](src/main/java/Main.java) : elabora i tweet memeorizzati nel db in una forma tweet -> hashtag;
+> * [`tweetElaborator.createHashtag2vec(sogliaMinimaHashtag)`](src/main/java/Main.java) : estrae e memorizza solo gli hashtag che superano una certa soglia di tweet;
+> * [`common = tweetElaborator.findCommonTopic(topics)`](src/main/java/Main.java) : trova un topic in comune tra gli hashtag scelti ed i top topic del clustering three;
+> * [`tweetElaborator.createBackgroundForTopic(common)`](src/main/java/Main.java) : crea il background sul topic scelto memorizzando i tweet nel db;
+> * [`tweetElaborator.createWord2weight(sogliaMinimaWords)`](src/main/java/Main.java) : salva le probabilità rispetto alle parole contenute nel background model;
+
+> * [`TweetSmoothingStreams`](src/main/java/TweetSmoothingStreams.java) : apre lo stream di twitter ed esegue il focused crawler in real time memorizzando solo i tweet pertinenti.
 
 #### CONSIDERAZIONI FINALI e SVILUPPI
 
